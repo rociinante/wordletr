@@ -5,6 +5,11 @@
       "emoji": "📖",
       "aciklama": "Genel Türkçe kelimeler"
     },
+    "ingilizce": {
+      "isim": "İngilizce",
+      "emoji": "🇬🇧",
+      "aciklama": "English words - pratik yap!"
+    },
     "filmler": {
       "isim": "Filmler",
       "emoji": "🎬",
@@ -27,6 +32,18 @@
     }
   },
   "klasik": {
+    "4": [
+      "aile", "akıl", "alan", "alet", "altı", "amaç", "anne", "aşık", "ayak", "baba",
+      "balı", "bank", "batı", "beşi", "bile", "boya", "bunu", "çağı", "çare", "ceza",
+      "dağı", "dalı", "darı", "deli", "deri", "dile", "dizi", "doğu", "doku", "dolu",
+      "dost", "dönü", "düğü", "düne", "ekim", "elim", "eser", "eşim", "etki", "etti",
+      "evet", "ezgi", "fark", "fikr", "film", "gece", "gemi", "genç", "geri", "göre",
+      "grup", "gücü", "gülü", "hala", "halk", "hane", "harf", "hata", "işte", "kale",
+      "kalp", "kapı", "kasa", "kent", "kere", "kılı", "kira", "koca", "köyü", "kral",
+      "kuşu", "lise", "mavi", "okul", "olay", "önce", "önem", "ötür", "özgü", "plan",
+      "ruhü", "saat", "sade", "salt", "sana", "seni", "sert", "site", "sıvı", "şube",
+      "süre", "tarz", "tema", "uzak", "uzun", "veri", "yağı", "yalı", "yanı", "yapı"
+    ],
     "5": [
       "adres", "akşam", "altın", "annem", "arada", "arkam", "aslım", "aşkım", "baban", "bahçe",
       "balık", "banka", "başka", "bayır", "bilgi", "biraz", "bölge", "boyut", "bulut", "büyük",
@@ -45,39 +62,200 @@
       "seyir", "sıfır", "sınav", "sınır", "siren", "soğuk", "sokak", "sonra", "sonuç", "süreç",
       "tabak", "tablo", "talep", "tanım", "tarif", "tatil", "tarih", "taşra", "tekil", "temel",
       "tenis", "tepki", "teras", "toplu", "tutum", "tuzak", "ürünü", "üzeri", "vagon", "vakit",
-      "vatan", "video", "yatak", "yazar", "yemek", "yılan", "yolcu", "yorum", "yudum", "zaman",
-      "amber", "bamya", "cacık", "çakıl", "dalış", "ebedi", "fener", "gazoz", "halay", "ılgın",
-      "jambon", "kefal", "limon", "makas", "nakış", "okçu", "palyaç", "ranza", "salça", "tahta"
+      "vatan", "video", "yatak", "yazar", "yemek", "yılan", "yolcu", "yorum", "yudum", "zaman"
+    ],
+    "6": [
+      "aklına", "alanın", "amaçlı", "anlama", "aranan", "aslına", "bakımı", "baskın", "başarı",
+      "beyazı", "binası", "birimi", "boyutu", "büyüme", "çalışı", "canlıı", "çekimi", "çember",
+      "dalışı", "dalgıç", "değişi", "deneyi", "destek", "devlet", "dikkat", "dilimi", "doğuma",
+      "dokuyu", "dönemi", "düğümü", "dünyas", "durumu", "düşman", "düzeni", "eğitim", "enerji",
+      "galeri", "geliri", "gerçek", "gezgin", "gölges", "görevi", "görüşü", "gözlem", "grafik",
+      "gündem", "güvenç", "hasarı", "hesabı", "hizmet", "ilçesi", "insanı", "işlemi", "kabulü",
+      "kadını", "kalite", "kamyon", "kanıtı", "kapsam", "kardeş", "kaynak", "kelime", "kentli",
+      "kesimi", "kıymet", "kültür", "kurulu", "limanı", "lokant", "madeni", "makale", "manzar",
+      "market", "medeni", "merkez", "mesafe", "meslek", "meydan", "modeli", "müdürl", "müzesi",
+      "nesnel", "numara", "odanın", "okumak", "olarak", "onarım", "otoban", "öğreni", "önemli",
+      "örgütü", "örneği", "özelli", "paketi", "paneli", "parkur", "pazarı", "planlı", "projes",
+      "raporu", "resimi", "romana", "sağlık", "sanatı", "sanayi", "şansım", "savaşı", "sayısı",
+      "sektör", "senarı", "serbez", "seyahı", "sıfatı", "sinema", "sistem", "sokağı", "sorunu",
+      "sosyal", "süreci", "tabela", "takımı", "tanıma", "tarıma", "teknik", "terapi", "toplam",
+      "toplum", "tutarı", "türkçe", "uzmanı", "varlık", "yarını", "yasağı", "yazılı", "yeşili",
+      "yollar", "yöntem", "yorumu", "yüksek", "yüzeyi", "zaferi", "zararı", "zengin", "zincir"
+    ],
+    "7": [
+      "açılışı", "aktarma", "alanına", "amaçlar", "anlamak", "anlatım", "araştır", "bakanlı",
+      "başarıı", "başlama", "belirti", "bildiri", "bilinçi", "binalar", "birimle", "bölgesi",
+      "bölümün", "buluşma", "canlısı", "çalışan", "çalışma", "çevresi", "çizelge", "dalışçı",
+      "değişim", "denetim", "denemek", "devamın", "devleti", "dikkati", "dizaynı", "doğrulu",
+      "dönüşüm", "duyarlı", "dünyası", "dünyaya", "düşünce", "düzenli", "eğilimi", "eğitimi",
+      "ekonomi", "elemanı", "enerjii", "etkinli", "fabrika", "faktörü", "festival", "fikrilı",
+      "finansı", "fizikse", "formülü", "galerıı", "geçmişi", "gelişti", "gençlik", "gerekli",
+      "gıdalar", "girişci", "görevli", "görünüm", "görüşme", "gözlemi", "günceli", "güvenli",
+      "haftası", "hakları", "haritası", "hastane", "hazırlı", "hizmeti", "içerigi", "ihtiyaç",
+      "iletişi", "insanlı", "internet", "kaliteli", "kapasite", "kaynağı", "kimligi", "kimyasa",
+      "kitaplı", "konaklı", "köprüsü", "kültürü", "kurallaı", "kurumla", "kütüpha", "liderli",
+      "limanını", "lokanta", "mağazası", "makalei", "manzara", "markası", "meclisi", "medyası",
+      "merkezi", "mesajları", "mesleği", "meydanı", "mimarisi", "misafir", "modeller", "motorlu",
+      "müdürlü", "müzakere", "müzeler", "nesneler", "nitelik", "numaras", "odaları", "okullar",
+      "olaylar", "onarımı", "öğrenci", "öğretim", "önemlii", "örgütün", "örnekle", "özellik",
+      "paketler", "parklar", "pazarlı", "personel", "planlar", "politii", "pratikı", "programı",
+      "projeli", "protokol", "raporlar", "rehberl", "reklamı", "restoran", "romanlar", "sağlığı",
+      "sanatçı", "sanayisi", "sayılar", "sektörü", "senaryo", "seyahat", "sığınak", "sinemaa",
+      "sistemi", "sokakla", "sonuçla", "sorunla", "sosyalı", "stadyum", "strateji", "süreçle",
+      "tablola", "takımla", "tanıtım", "tarihli", "tasarım", "teknoloji", "televizı", "terminal",
+      "toplantı", "toplumı", "trafiki", "tüketici", "türküsü", "uzmanla", "üretimi", "varlığı",
+      "yaşantı", "yazılım", "yetkilı", "yönetici", "yönetim", "yorumla", "yüzeyin", "zamanın"
+    ],
+    "8": [
+      "açıklama", "aktarımı", "alanında", "anlaşmak", "araçları", "bakanlık", "başarılı",
+      "başlangı", "bildirge", "bilinçli", "birleşim", "bölgesel", "buluşlar", "çalışanı",
+      "değişken", "denetimi", "devletim", "dizaynci", "doğrudan", "düşüncei", "düzenlei",
+      "eğitimci", "ekonomik", "elemanla", "etkinlik", "fabrikaa", "faktörlü", "finansal",
+      "formülle", "galerisi", "geçmişte", "gelişimi", "gençleri", "gerekçei", "girişimi",
+      "görünümü", "görüşler", "güncelle", "güvenilir", "hakların", "haritada", "hastanei",
+      "hazırlan", "hizmetii", "ihtiyacı", "iletişim", "insanlar", "interneti", "kaliteii",
+      "kapasiti", "kaynakla", "kimliğii", "kitaplar", "konaklam", "köprüler", "kültürel",
+      "kurallai", "kurumlar", "kütüphan", "liderlik", "limanlar", "lokantal", "mağazala",
+      "makalele", "manzaral", "markaları", "meclisle", "medyalar", "merkezii", "mesajlar",
+      "meslekle", "meydanla", "mimariye", "misafirl", "motorluu", "müdürlüi", "müzakeri",
+      "nesnelei", "nitelikl", "numarala", "odalarii", "okulları", "olaylari", "onarımla",
+      "öğrencii", "öğretimi", "önemlisi", "örneğini", "özelliği", "paketlei", "parklari",
+      "pazarlam", "personel", "planları", "politika", "pratikle", "programi", "projelei",
+      "protokol", "raporlai", "rehberli", "reklamma", "restoran", "romanlai", "sağlıklı",
+      "sanatçıi", "sanayiyi", "sayıları", "sektörel", "senaryol", "seyahati", "sığınakl",
+      "sistemle", "sokaklai", "sonuçlai", "sorunlai", "sosyalle", "stadyumi", "stratejii"
+    ]
+  },
+  "ingilizce": {
+    "4": [
+      "able", "acid", "aged", "also", "area", "army", "away", "baby", "back", "ball",
+      "band", "bank", "base", "bath", "bear", "beat", "been", "bell", "belt", "best",
+      "bill", "bird", "blow", "blue", "boat", "body", "bomb", "bond", "bone", "book",
+      "born", "boss", "both", "burn", "bush", "busy", "call", "calm", "came", "camp",
+      "card", "care", "case", "cash", "cast", "cell", "chat", "chip", "city", "club",
+      "coal", "coat", "code", "cold", "come", "cook", "cool", "cope", "copy", "core",
+      "cost", "crew", "crop", "dark", "data", "date", "dawn", "days", "dead", "deal",
+      "dean", "dear", "debt", "deep", "deny", "desk", "diet", "disk", "does", "done",
+      "door", "down", "draw", "drew", "drop", "drug", "dual", "duke", "dust", "duty",
+      "each", "earn", "ease", "east", "easy", "edge", "else", "even", "ever", "evil"
+    ],
+    "5": [
+      "about", "above", "abuse", "actor", "acute", "admit", "adopt", "adult", "after", "again",
+      "agent", "agree", "ahead", "alarm", "album", "alert", "alien", "align", "alike", "alive",
+      "allow", "alone", "along", "alter", "among", "anger", "angle", "angry", "apart", "apple",
+      "apply", "arena", "argue", "arise", "armor", "array", "arrow", "asset", "avoid", "award",
+      "aware", "awful", "basic", "basis", "beach", "began", "begin", "being", "below", "bench",
+      "birth", "black", "blade", "blame", "blank", "blast", "blaze", "bleed", "blend", "bless",
+      "blind", "block", "blood", "bloom", "blown", "board", "boost", "booth", "bound", "brain",
+      "brand", "brass", "brave", "bread", "break", "breed", "brick", "bride", "brief", "bring",
+      "broad", "broke", "brown", "brush", "build", "built", "bunch", "burst", "buyer", "cable",
+      "candy", "cargo", "carry", "catch", "cause", "chain", "chair", "chalk", "champ", "chaos",
+      "charm", "chart", "chase", "cheap", "check", "cheek", "cheer", "chess", "chest", "chief",
+      "child", "chill", "china", "chose", "chunk", "civic", "civil", "claim", "clash", "class",
+      "clean", "clear", "clerk", "click", "cliff", "climb", "clock", "close", "cloth", "cloud",
+      "coach", "coast", "color", "colon", "coral", "could", "count", "court", "cover", "crack",
+      "craft", "crash", "crazy", "cream", "crime", "crisp", "cross", "crowd", "crown", "crude",
+      "crush", "curve", "cycle", "daily", "dance", "dated", "dealt", "death", "debut", "decay",
+      "delay", "dense", "depth", "devil", "diary", "dirty", "disco", "divine", "donor", "doubt",
+      "dozen", "draft", "drain", "drama", "drank", "drawn", "dread", "dream", "dress", "dried",
+      "drift", "drill", "drink", "drive", "drove", "drunk", "dying", "eager", "early", "earth",
+      "eight", "elder", "elect", "elite", "email", "empty", "enemy", "enjoy", "enter", "entry"
+    ],
+    "6": [
+      "absorb", "accept", "access", "accord", "accuse", "across", "acting", "action", "active", "actual",
+      "adjust", "admire", "advice", "advise", "affair", "affect", "afford", "afraid", "agency", "agenda",
+      "almost", "always", "amount", "animal", "annual", "answer", "anyone", "anyway", "appeal", "appear",
+      "around", "arrest", "arrive", "artist", "aspect", "assess", "assist", "assume", "assure", "attach",
+      "attack", "attend", "august", "author", "backed", "backup", "banner", "barely", "barrel", "basket",
+      "battle", "beauty", "became", "become", "before", "behalf", "behind", "belief", "belong", "beside",
+      "better", "beyond", "bitter", "blanket", "border", "bother", "bottle", "bottom", "bounce", "branch",
+      "breath", "bridge", "bright", "broken", "broker", "bronze", "browse", "budget", "buffer", "burden",
+      "button", "buying", "called", "camera", "campus", "cancel", "cancer", "candle", "cannot", "canvas",
+      "carbon", "career", "castle", "casual", "cattle", "caught", "center", "centre", "chance", "change",
+      "charge", "choice", "choose", "chosen", "church", "circle", "closed", "closer", "coffee", "column",
+      "combat", "comedy", "coming", "commit", "common", "comply", "copper", "corner", "costly", "cotton",
+      "county", "couple", "course", "covers", "create", "credit", "crisis", "custom", "damage", "danger",
+      "deadly", "debate", "decade", "decent", "decide", "defeat", "defend", "define", "degree", "demand",
+      "depend", "deputy", "desert", "design", "desire", "detail", "detect", "device", "devote", "differ",
+      "dining", "dinner", "direct", "divide", "divine", "doctor", "dollar", "domain", "donate", "double",
+      "driven", "driver", "during", "easily", "eating", "edited", "editor", "effect", "effort", "eighth",
+      "either", "empire", "employ", "enable", "ending", "energy", "engage", "engine", "enough", "ensure",
+      "entire", "entity", "equity", "escape", "estate", "ethnic", "evolve", "exceed", "except", "excess"
+    ],
+    "7": [
+      "abandon", "ability", "absence", "absolut", "academy", "account", "accused", "achieve", "acquire", "actress",
+      "adapter", "address", "adequate", "adjunct", "admiral", "adopted", "advance", "adverse", "adviser", "affairs",
+      "affects", "against", "airport", "alcohol", "aligned", "alleged", "allowed", "already", "analyst", "analyze",
+      "ancient", "animals", "another", "answers", "antenna", "anxiety", "anybody", "anymore", "anxious", "appoint",
+      "applied", "approve", "archive", "article", "artwork", "assault", "assumed", "assured", "athlete", "attempt",
+      "attract", "auction", "auditor", "average", "avoided", "awarded", "backing", "balance", "banking", "bargain",
+      "barrier", "battery", "bearing", "because", "bedroom", "believe", "beneath", "benefit", "besides", "betting",
+      "between", "billion", "binding", "blanket", "blessed", "blowing", "bombing", "bonding", "booking", "boolean",
+      "borders", "borough", "brother", "brought", "builder", "burning", "cabinet", "calcium", "calling", "capable",
+      "capital", "captain", "caption", "capture", "cardiac", "carrier", "cartoon", "catalog", "caution", "ceiling",
+      "central", "century", "ceramic", "certain", "chamber", "changed", "channel", "chapter", "charged", "charity",
+      "charter", "cheaper", "checked", "chicken", "chronic", "circuit", "citizen", "claimed", "classic", "cleaned",
+      "cleaner", "clearly", "climate", "climbed", "clinica", "closing", "cluster", "coastal", "coating", "coffees",
+      "collect", "college", "colored", "columns", "combine", "comfort", "command", "comment", "committ", "commons",
+      "compact", "company", "compare", "compere", "compete", "compile", "complex", "compose", "compute", "concept",
+      "concern", "concert", "conduct", "confess", "confirm", "confuse", "connect", "consent", "consist", "contact",
+      "contain", "content", "context", "control", "convert", "cooking", "cooling", "copying", "correct", "corrupt",
+      "costume", "cottage", "council", "counsel", "counter", "country", "courage", "courses", "covered", "crashed",
+      "created", "creator", "credits", "cricket", "crimina", "critical", "crossed", "crucial", "crystal", "cuisine"
+    ],
+    "8": [
+      "absolute", "abstract", "academic", "accepted", "accessed", "accident", "accuracy", "accurate", "achieved", "acquired",
+      "activity", "actually", "addition", "adequate", "adjusted", "admitted", "adoption", "advanced", "advisory", "advocate",
+      "affected", "alliance", "although", "aluminum", "analysis", "announce", "anything", "anywhere", "apparent", "appendix",
+      "appetite", "approach", "approval", "approved", "argument", "arranged", "arrested", "articles", "artistic", "assembly",
+      "assessed", "assigned", "assisted", "assuming", "asterisk", "athletic", "attached", "attacked", "attained", "attempted",
+      "attended", "attitude", "attorney", "attracted", "audience", "bachelor", "backbone", "backdrop", "balanced", "bankrupt",
+      "barefoot", "bargains", "barriers", "baseball", "baseline", "basement", "bathroom", "beatiful", "becoming", "beginner",
+      "behavior", "believer", "belonged", "benefits", "berkeley", "betrayal", "beverage", "biblical", "bilateral", "billions",
+      "birthday", "blessing", "blocking", "boarding", "boundary", "brackets", "branches", "breaking", "breeding", "briefing",
+      "bringing", "broadway", "brothers", "browsers", "browsing", "budgeted", "building", "bulletin", "burglary", "business",
+      "calendar", "campaign", "capacity", "captured", "carefull", "caroline", "carrying", "casework", "casualty", "catching",
+      "category", "catering", "cautious", "centered", "ceremony", "chairman", "chambers", "champion", "chapters", "charging",
+      "charming", "checking", "chemical", "children", "choosing", "circular", "citation", "citizens", "claiming", "classics",
+      "cleaning", "clearance", "clicking", "climbing", "clinical", "clothing", "coaching", "cocktail", "cognitive", "collapse",
+      "colleges", "colonial", "colorado", "combined", "comedian", "comeback", "commands", "commerce", "commonly", "communal",
+      "compared", "compiled", "complete", "composed", "compound", "comprise", "computer", "conceive", "concepts", "conclude",
+      "concrete", "condemn", "conflict", "confused", "congress", "connects", "conquest", "consider", "consists", "constant",
+      "consumer", "contacts", "contains", "contempt", "contents", "contexts", "continue", "contract", "contrast", "controls"
     ]
   },
   "filmler": {
     "5": [
-      "avatar", "joker", "rocky", "alien", "bambi", "caspa", "dumbo", "fargo", "ghost", "giant",
-      "greed", "heidi", "jango", "karate", "logan", "matrix", "nanny", "ocean", "pearl", "queen",
-      "rambo", "scream", "shrek", "signs", "siren", "spawn", "speed", "split", "storm", "taken",
-      "titan", "tommy", "tron", "twins", "venom", "virus", "water", "x-men", "yüzük", "zombi"
+      "avatar", "joker", "rocky", "alien", "bambi", "dumbo", "fargo", "ghost", "giant", "greed",
+      "heidi", "karate", "logan", "nanny", "ocean", "pearl", "queen", "rambo", "shrek", "signs",
+      "siren", "spawn", "speed", "split", "storm", "taken", "titan", "tommy", "twins", "venom",
+      "virus", "water", "zombi", "blade", "ateşi", "çılgın", "hızlı", "kayıp", "maske", "savaş"
     ]
   },
   "futbol": {
     "5": [
-      "messi", "pele", "xavi", "kaka", "henry", "zidan", "ronny", "giggs", "keane", "vidic",
-      "terry", "lamps", "gerrr", "torres", "villa", "silva", "iniesta", "busqu", "puyol", "xabi",
-      "hakan", "arda", "burak", "cenk", "emre", "volkan", "ümit", "tümer", "rıdvan", "bülent",
-      "sergen", "nihat", "ilhan", "metin", "tanju", "rüştü", "oğuz", "ertuğ", "fatih", "şenol"
+      "messi", "henry", "kaka", "xavi", "giggs", "keane", "vidic", "terry", "villa", "silva",
+      "puyol", "hakan", "emre", "burak", "cenk", "arda", "volkan", "ümit", "tümer", "bülent",
+      "sergen", "nihat", "ilhan", "metin", "tanju", "rüştü", "oğuz", "fatih", "şenol", "terim"
     ]
   },
   "sehirler": {
     "5": [
-      "adana", "bursa", "düzce", "elazı", "ığdır", "izmir", "kilis", "konya", "muğla", "niğde",
-      "ordu", "rize", "samsun", "sivas", "sinop", "şanlı", "tokat", "uşak", "yalova", "yozgat",
-      "aksaray", "aydın", "bolu", "çorum", "edirne", "erzurum", "giresun", "hatay", "kars", "malatya"
+      "adana", "bursa", "düzce", "ığdır", "izmir", "kilis", "konya", "muğla", "niğde", "ordu",
+      "rize", "sivas", "sinop", "tokat", "uşak", "yozgat", "aydın", "bolu", "çorum", "hatay"
+    ],
+    "6": [
+      "adıyam", "aksara", "amasya", "ankara", "antalya", "artvin", "balıkesir", "batman", "baybur",
+      "bilecik", "bingöl", "bitlis", "burdur", "çankır", "çoruma", "denizl", "diyarb", "edirne",
+      "erzinca", "erzuru", "eskişe", "gazian", "giresun", "gümüşh", "hakkar", "hataya", "iğdıra",
+      "isparta", "istanb", "izmira", "kahrma", "karaman", "kastam", "kayser", "kırıkk", "kırşeh"
     ]
   },
   "muzik": {
     "5": [
-      "tarkan", "sezen", "ajda", "bülent", "sertab", "hadise", "murat", "kenan", "demet", "hande",
-      "aleyna", "berkay", "emrah", "ferdi", "gülben", "hülya", "ibrahim", "kayahan", "levent", "mazhar",
-      "mustafa", "nilüfer", "orhan", "rafet", "serdar", "şebnem", "teoman", "yavuz", "zerrin", "ziynet"
+      "tarkan", "sezen", "ajda", "sertab", "hadise", "murat", "kenan", "demet", "hande", "aleyna",
+      "berkay", "emrah", "ferdi", "gülben", "hülya", "kayahan", "levent", "mazhar", "nilüfer", "orhan",
+      "rafet", "serdar", "şebnem", "teoman", "yavuz", "zerrin", "ziynet", "simge", "sedef", "melek"
     ]
   }
 }
