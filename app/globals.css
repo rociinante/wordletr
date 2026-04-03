@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-display: 'Space Mono', monospace;
+  --font-body: 'Outfit', sans-serif;
+  
+  /* Aydınlık tema */
+  --bg-primary: #fafafa;
+  --bg-secondary: #f0f0f0;
+  --bg-tertiary: #e5e5e5;
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --border-color: #d4d4d4;
+  --accent: #2563eb;
+}
+
+.dark {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #171717;
+  --bg-tertiary: #262626;
+  --text-primary: #fafafa;
+  --text-secondary: #a3a3a3;
+  --border-color: #404040;
+  --accent: #3b82f6;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Hücre stilleri */
+.hucre {
+  @apply w-14 h-14 sm:w-16 sm:h-16 border-2 flex items-center justify-center text-2xl sm:text-3xl font-bold uppercase transition-all duration-200;
+  font-family: var(--font-display);
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.hucre.dolu {
+  @apply animate-pop;
+  border-color: var(--text-secondary);
+}
+
+.hucre.dogru {
+  @apply bg-green-500 border-green-500 text-white;
+}
+
+.hucre.yerinde {
+  @apply bg-yellow-500 border-yellow-500 text-white;
+}
+
+.hucre.yok {
+  @apply bg-neutral-600 border-neutral-600 text-white;
+}
+
+/* Klavye tuşları */
+.tus {
+  @apply px-2 py-4 sm:px-3 sm:py-4 rounded-md font-semibold text-sm sm:text-base transition-all duration-150 active:scale-95;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  min-width: 28px;
+}
+
+.tus:hover {
+  filter: brightness(1.1);
+}
+
+.tus.dogru {
+  @apply bg-green-500 text-white;
+}
+
+.tus.yerinde {
+  @apply bg-yellow-500 text-white;
+}
+
+.tus.yok {
+  @apply bg-neutral-700 text-neutral-400;
+}
+
+.tus.ozel {
+  @apply px-3 sm:px-4 text-xs sm:text-sm;
+  min-width: 50px;
+}
+
+/* Modal */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  @apply rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl;
+  background-color: var(--bg-secondary);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Buton stilleri */
+.btn-primary {
+  @apply px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+  @apply px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* İstatistik kartları */
+.stat-card {
+  @apply p-4 rounded-xl text-center;
+  background-color: var(--bg-tertiary);
+}
+
+.stat-number {
+  @apply text-3xl sm:text-4xl font-bold;
+  font-family: var(--font-display);
+  color: var(--accent);
+}
+
+.stat-label {
+  @apply text-sm mt-1;
+  color: var(--text-secondary);
+}
+
+/* Dağılım grafiği */
+.dagilim-bar {
+  @apply h-6 rounded-r transition-all duration-500;
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+  min-width: 24px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Sayaç animasyonu */
+.saatli-sayi {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
