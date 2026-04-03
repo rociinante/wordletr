@@ -4,19 +4,22 @@ import { useState, useEffect, useCallback } from 'react';
 import Header from '../components/Header';
 import Tahta from '../components/Tahta';
 import Klavye from '../components/Klavye';
-import UzunlukSecici from '../components/UzunlukSecici';
-import Modal, { SonucIcerigi, NasilOynanirIcerigi } from '../components/Modal';
+import Modal, { SonucIcerigi, NasilOynanirIcerigi, LiderlikIcerigi, KategoriSeciciIcerigi } from '../components/Modal';
 import { kontrolEt, klavyeGuncelle, paylasimMetni } from '../lib/oyunMotoru';
-import { rastgeleKelime, mevcutUzunluklar, oyunSayisiGetir, oyunSayisiArtir } from '../lib/kelimeSecici';
+import { rastgeleKelime, kategorileriGetir, oyunSayisiGetir, oyunSayisiArtir, ipucuHakkiHesapla, ipucuOlustur } from '../lib/kelimeSecici';
 import { 
   istatistikGetir, 
   kazandiGuncelle, 
-  kaybettiGuncelle 
+  kaybettiGuncelle,
+  kullaniciGetir,
+  kullaniciAdiGuncelle,
+  liderlikGetir,
+  liderlikGuncelle
 } from '../lib/depolama';
 
 export default function Home() {
   // Oyun durumu
-  const [uzunluk, setUzunluk] = useState(5);
+  const [kategori, setKategori] = useState('klasik');
   const [hedefKelime, setHedefKelime] = useState('');
   const [tahminler, setTahminler] = useState([]);
   const [sonuclar, setSonuclar] = useState([]);
@@ -27,17 +30,28 @@ export default function Home() {
   const [sallanim, setSallanim] = useState(false);
   const [oyunSayisi, setOyunSayisi] = useState(1);
 
+  // İpucu durumu
+  const [ipucuHakki, setIpucuHakki] = useState(2);
+  const [kullanilanIpucu, setKullanilanIpucu] = useState([]);
+  
+  // Kullanıcı ve liderlik
+  const [kullanici, setKullanici] = useState({ ad: 'Misafir', id: null });
+  const [liderlik, setLiderlik] = useState([]);
+
   // Modal durumları
   const [bilgiModalAcik, setBilgiModalAcik] = useState(false);
   const [sonucModalAcik, setSonucModalAcik] = useState(false);
+  const [liderlikModalAcik, setLiderlikModalAcik] = useState(false);
+  const [kategoriModalAcik, setKategoriModalAcik] = useState(false);
   const [istatistik, setIstatistik] = useState(null);
+  const [kategoriler, setKategoriler] = useState({});
 
   // İlk yükleme kontrolü
   const [yuklendi, setYuklendi] = useState(false);
 
   // Yeni oyun başlat
-  const yeniOyunBaslat = useCallback((yeniUzunluk = uzunluk) => {
-    const kelime = rastgeleKelime(yeniUzunluk, hedefKelime);
+  const yeniOyunBaslat = useCallback((yeniKategori = kategori) => {
+    const kelime = rastgeleKelime(yeniKategori, hedefKelime);
     setHedefKelime(kelime);
     setTahminler([]);
     setSonuclar([]);
@@ -47,11 +61,27 @@ export default function Home() {
     setKazandi(false);
     setSonucModalAcik(false);
     setOyunSayisi(oyunSayisiGetir());
-  }, [uzunluk, hedefKelime]);
+    setKullanilanIpucu([]);
+    
+    // İpucu hakkını hesapla
+    const ist = istatistikGetir();
+    setIpucuHakki(ipucuHakkiHesapla(ist));
+  }, [kategori, hedefKelime]);
 
   // İlk yükleme
   useEffect(() => {
-    yeniOyunBaslat(uzunluk);
+    const kat = kategorileriGetir();
+    setKategoriler(kat);
+    setKullanici(kullaniciGetir());
+    setLiderlik(liderlikGetir());
+    
+    const kelime = rastgeleKelime('klasik', '');
+    setHedefKelime(kelime);
+    
+    const ist = istatistikGetir();
+    setIpucuHakki(ipucuHakkiHesapla(ist));
+    setOyunSayisi(oyunSayisiGetir());
+    
     setYuklendi(true);
   }, []);
 
@@ -74,35 +104,54 @@ export default function Home() {
       const key = e.key.toUpperCase();
       
       if (key === 'ENTER') {
-        tahminGonder();
+        e.preventDefault();
+        tahminGonderRef.current();
       } else if (key === 'BACKSPACE') {
-        harfSil();
+        harfSilRef.current();
       } else if (/^[A-ZÇĞİÖŞÜ]$/.test(key)) {
-        harfEkle(key);
+        harfEkleRef.current(key);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [oyunBitti, mevcutTahmin, uzunluk, tahminler, hedefKelime]);
-
-  // Harf ekle
-  const harfEkle = useCallback((harf) => {
-    if (oyunBitti) return;
-    if (mevcutTahmin.length >= uzunluk) return;
-    setMevcutTahmin(prev => prev + harf);
-  }, [oyunBitti, mevcutTahmin, uzunluk]);
-
-  // Harf sil
-  const harfSil = useCallback(() => {
-    if (oyunBitti) return;
-    setMevcutTahmin(prev => prev.slice(0, -1));
   }, [oyunBitti]);
 
-  // Tahmin gönder
-  const tahminGonder = useCallback(() => {
+  // Ref'ler callback'ler için
+  const harfEkleRef = { current: null };
+  const harfSilRef = { current: null };
+  const tahminGonderRef = { current: null };
+
+  // Harf ekle
+  harfEkleRef.current = (harf) => {
     if (oyunBitti) return;
-    if (mevcutTahmin.length !== uzunluk) {
+    if (!hedefKelime) return;
+    if (mevcutTahmin.length >= hedefKelime.length) return;
+    setMevcutTahmin(prev => prev + harf);
+  };
+
+  // Harf sil
+  harfSilRef.current = () => {
+    if (oyunBitti) return;
+    setMevcutTahmin(prev => prev.slice(0, -1));
+  };
+
+  // İpucu kullan
+  const ipucuKullan = () => {
+    if (ipucuHakki <= 0 || oyunBitti) return;
+    
+    const ipucu = ipucuOlustur(hedefKelime, tahminler, 'harf');
+    if (ipucu) {
+      setKullanilanIpucu(prev => [...prev, ipucu]);
+      setIpucuHakki(prev => prev - 1);
+    }
+  };
+
+  // Tahmin gönder
+  tahminGonderRef.current = () => {
+    if (oyunBitti) return;
+    if (!hedefKelime) return;
+    if (mevcutTahmin.length !== hedefKelime.length) {
       setSallanim(true);
       setTimeout(() => setSallanim(false), 500);
       return;
@@ -126,6 +175,7 @@ export default function Home() {
       setOyunBitti(true);
       setKazandi(true);
       oyunSayisiArtir();
+      setLiderlik(liderlikGuncelle());
       
       setTimeout(() => setSonucModalAcik(true), 1500);
     } else if (yeniTahminler.length >= 6) {
@@ -134,27 +184,64 @@ export default function Home() {
       setOyunBitti(true);
       setKazandi(false);
       oyunSayisiArtir();
+      setLiderlik(liderlikGuncelle());
       
       setTimeout(() => setSonucModalAcik(true), 1500);
     }
-  }, [oyunBitti, mevcutTahmin, uzunluk, hedefKelime, tahminler, sonuclar]);
+  };
 
   // Sanal klavye girişi
-  const handleKlavye = useCallback((tus) => {
+  const handleKlavye = (tus) => {
     if (tus === 'ENTER') {
-      tahminGonder();
+      tahminGonderRef.current();
     } else if (tus === 'BACKSPACE') {
-      harfSil();
+      harfSilRef.current();
     } else {
-      harfEkle(tus);
+      harfEkleRef.current(tus);
     }
-  }, [tahminGonder, harfSil, harfEkle]);
+  };
 
-  // Uzunluk değişimi
-  const handleUzunlukDegis = (yeniUzunluk) => {
-    if (tahminler.length > 0) return;
-    setUzunluk(yeniUzunluk);
-    yeniOyunBaslat(yeniUzunluk);
+  // Kategori değişimi
+  const handleKategoriDegis = (yeniKategori) => {
+    setKategori(yeniKategori);
+    setKategoriModalAcik(false);
+    
+    const kelime = rastgeleKelime(yeniKategori, hedefKelime);
+    setHedefKelime(kelime);
+    setTahminler([]);
+    setSonuclar([]);
+    setMevcutTahmin('');
+    setHarfDurumlari({});
+    setOyunBitti(false);
+    setKazandi(false);
+    setKullanilanIpucu([]);
+    
+    const ist = istatistikGetir();
+    setIpucuHakki(ipucuHakkiHesapla(ist));
+  };
+
+  // Kullanıcı adı değişimi
+  const handleKullaniciAdiDegistir = (yeniAd) => {
+    const guncellenmis = kullaniciAdiGuncelle(yeniAd);
+    setKullanici(guncellenmis);
+    setLiderlik(liderlikGuncelle());
+  };
+
+  // Logo tıklama - oyunu sıfırla
+  const handleLogoTikla = () => {
+    const kelime = rastgeleKelime(kategori, hedefKelime);
+    setHedefKelime(kelime);
+    setTahminler([]);
+    setSonuclar([]);
+    setMevcutTahmin('');
+    setHarfDurumlari({});
+    setOyunBitti(false);
+    setKazandi(false);
+    setSonucModalAcik(false);
+    setKullanilanIpucu([]);
+    
+    const ist = istatistikGetir();
+    setIpucuHakki(ipucuHakkiHesapla(ist));
   };
 
   // Paylaşım metni
@@ -164,7 +251,7 @@ export default function Home() {
 
   // Yeni oyun
   const handleYeniOyun = () => {
-    yeniOyunBaslat(uzunluk);
+    handleLogoTikla();
   };
 
   if (!yuklendi) {
@@ -175,6 +262,8 @@ export default function Home() {
     );
   }
 
+  const mevcutKategoriInfo = kategoriler[kategori] || { isim: 'Klasik', emoji: '📖' };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header 
@@ -183,18 +272,53 @@ export default function Home() {
           setIstatistik(istatistikGetir());
           setSonucModalAcik(true);
         }}
+        onLogoTikla={handleLogoTikla}
+        onLiderlik={() => {
+          setLiderlik(liderlikGetir());
+          setLiderlikModalAcik(true);
+        }}
       />
 
       <main className="flex-1 flex flex-col items-center justify-between py-4 px-2 max-w-lg mx-auto w-full">
-        {/* Uzunluk seçici */}
-        <div className="mb-4">
-          <UzunlukSecici
-            mevcutUzunluk={uzunluk}
-            uzunluklar={mevcutUzunluklar()}
-            onChange={handleUzunlukDegis}
-            devreDisi={tahminler.length > 0}
-          />
+        {/* Kategori seçici ve ipucu */}
+        <div className="w-full flex items-center justify-between mb-4 px-2">
+          <button 
+            onClick={() => setKategoriModalAcik(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all hover:scale-105"
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+          >
+            <span>{mevcutKategoriInfo.emoji}</span>
+            <span className="font-semibold">{mevcutKategoriInfo.isim}</span>
+            <span className="opacity-50">▼</span>
+          </button>
+
+          <button 
+            onClick={ipucuKullan}
+            disabled={ipucuHakki <= 0 || oyunBitti}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+              ipucuHakki > 0 && !oyunBitti ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
+            }`}
+            style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+          >
+            <span>💡</span>
+            <span className="font-semibold">{ipucuHakki}</span>
+          </button>
         </div>
+
+        {/* İpucu gösterimi */}
+        {kullanilanIpucu.length > 0 && (
+          <div className="w-full mb-4 px-2">
+            {kullanilanIpucu.map((ipucu, i) => (
+              <div 
+                key={i}
+                className="px-4 py-2 rounded-xl mb-2 text-center text-sm font-semibold"
+                style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #a855f7 100%)', color: 'white' }}
+              >
+                💡 {ipucu.mesaj}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Oyun tahtası */}
         <div className="flex-1 flex items-center">
@@ -202,7 +326,7 @@ export default function Home() {
             tahminler={tahminler}
             sonuclar={sonuclar}
             mevcutTahmin={mevcutTahmin}
-            uzunluk={uzunluk}
+            uzunluk={hedefKelime?.length || 5}
             sallanim={sallanim}
           />
         </div>
@@ -242,6 +366,33 @@ export default function Home() {
             oyunBpiitti={oyunBitti}
           />
         )}
+      </Modal>
+
+      {/* Liderlik modalı */}
+      <Modal
+        acik={liderlikModalAcik}
+        kapat={() => setLiderlikModalAcik(false)}
+        baslik="🏆 LİDERLİK TABLOSU"
+      >
+        <LiderlikIcerigi
+          liderlik={liderlik}
+          mevcutKullaniciId={kullanici.id}
+          kullaniciAdi={kullanici.ad}
+          onAdDegistir={handleKullaniciAdiDegistir}
+        />
+      </Modal>
+
+      {/* Kategori modalı */}
+      <Modal
+        acik={kategoriModalAcik}
+        kapat={() => setKategoriModalAcik(false)}
+        baslik="KATEGORİ SEÇ"
+      >
+        <KategoriSeciciIcerigi
+          kategoriler={kategoriler}
+          mevcutKategori={kategori}
+          onKategoriSec={handleKategoriDegis}
+        />
       </Modal>
     </div>
   );

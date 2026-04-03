@@ -7,7 +7,7 @@ export default function Modal({
   kapat, 
   baslik, 
   children,
-  tip = 'bilgi' // 'bilgi', 'sonuc', 'ayar'
+  tip = 'bilgi'
 }) {
   if (!acik) return null;
 
@@ -73,7 +73,6 @@ export function SonucIcerigi({
 
   return (
     <div className="space-y-6">
-      {/* Sonuç mesajı - sadece oyun bittiyse göster */}
       {oyunBpiitti && (
         <div className="text-center">
           {kazandi ? (
@@ -96,7 +95,6 @@ export function SonucIcerigi({
         </div>
       )}
 
-      {/* İstatistikler */}
       <div className="grid grid-cols-4 gap-2">
         <div className="stat-card">
           <div className="stat-number">{istatistik.oynanan}</div>
@@ -116,7 +114,6 @@ export function SonucIcerigi({
         </div>
       </div>
 
-      {/* Tahmin dağılımı */}
       <div className="space-y-1.5">
         <p className="text-sm font-semibold mb-3 uppercase tracking-wider opacity-70">Tahmin Dağılımı</p>
         {istatistik.dagilim.map((sayi, index) => (
@@ -134,7 +131,6 @@ export function SonucIcerigi({
         ))}
       </div>
 
-      {/* Butonlar */}
       <div className="space-y-3 pt-2">
         {oyunBpiitti && (
           <button 
@@ -152,6 +148,88 @@ export function SonucIcerigi({
           >
             Yeni Oyun 🎮
           </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Liderlik Tablosu İçeriği
+export function LiderlikIcerigi({ liderlik, mevcutKullaniciId, kullaniciAdi, onAdDegistir }) {
+  const [yeniAd, setYeniAd] = useState(kullaniciAdi);
+  const [duzenle, setDuzenle] = useState(false);
+
+  const handleKaydet = () => {
+    if (yeniAd.trim()) {
+      onAdDegistir(yeniAd.trim());
+    }
+    setDuzenle(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Kullanıcı adı düzenleme */}
+      <div className="p-4 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+        <p className="text-xs uppercase tracking-wider opacity-60 mb-2">Kullanıcı Adın</p>
+        {duzenle ? (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={yeniAd}
+              onChange={(e) => setYeniAd(e.target.value)}
+              maxLength={20}
+              className="flex-1 px-3 py-2 rounded-lg bg-black/20 border border-white/10 focus:border-purple-500 outline-none"
+              placeholder="Kullanıcı adı..."
+            />
+            <button onClick={handleKaydet} className="px-4 py-2 rounded-lg bg-green-500 text-white font-semibold">
+              ✓
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-lg">{kullaniciAdi}</span>
+            <button 
+              onClick={() => setDuzenle(true)}
+              className="px-3 py-1 rounded-lg text-sm opacity-70 hover:opacity-100 hover:bg-white/10"
+            >
+              ✏️ Düzenle
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Liderlik tablosu */}
+      <div className="space-y-2">
+        <p className="text-xs uppercase tracking-wider opacity-60">🏆 Liderlik Tablosu</p>
+        
+        {liderlik.length === 0 ? (
+          <p className="text-center opacity-50 py-4">Henüz kimse yok. İlk sen ol!</p>
+        ) : (
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {liderlik.slice(0, 10).map((oyuncu, index) => (
+              <div 
+                key={oyuncu.id}
+                className={`flex items-center gap-3 p-3 rounded-xl ${
+                  oyuncu.id === mevcutKullaniciId 
+                    ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30' 
+                    : ''
+                }`}
+                style={{ background: oyuncu.id !== mevcutKullaniciId ? 'var(--bg-tertiary)' : undefined }}
+              >
+                <span className="text-2xl w-8 text-center">
+                  {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                </span>
+                <div className="flex-1">
+                  <p className="font-semibold">{oyuncu.ad}</p>
+                  <p className="text-xs opacity-60">{oyuncu.kazanilan}/{oyuncu.oynanan} oyun • Seri: {oyuncu.seri}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg" style={{ color: 'var(--accent)' }}>{oyuncu.puan}</p>
+                  <p className="text-xs opacity-60">puan</p>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -185,9 +263,48 @@ export function NasilOynanirIcerigi() {
         </div>
       </div>
 
+      <div className="p-3 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+        <p className="font-semibold text-xs uppercase tracking-wider opacity-70 mb-2">💡 İpucu Sistemi</p>
+        <p className="opacity-80">Başarı oranına göre her oyunda 1-3 ipucu hakkın var. Serin arttıkça bonus ipucu kazanırsın!</p>
+      </div>
+
       <p className="opacity-60 text-center pt-2">
         ✨ Sınırsız oyun — istediğin kadar oyna!
       </p>
+    </div>
+  );
+}
+
+// Kategori Seçici İçeriği
+export function KategoriSeciciIcerigi({ kategoriler, mevcutKategori, onKategoriSec }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs uppercase tracking-wider opacity-60 mb-4">Bir kategori seç</p>
+      
+      <div className="grid gap-3">
+        {Object.entries(kategoriler).map(([key, kategori]) => (
+          <button
+            key={key}
+            onClick={() => onKategoriSec(key)}
+            className={`p-4 rounded-xl text-left transition-all ${
+              mevcutKategori === key 
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                : 'hover:scale-102'
+            }`}
+            style={{ 
+              background: mevcutKategori !== key ? 'var(--bg-tertiary)' : undefined,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{kategori.emoji}</span>
+              <div>
+                <p className="font-bold">{kategori.isim}</p>
+                <p className="text-xs opacity-70">{kategori.aciklama}</p>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
