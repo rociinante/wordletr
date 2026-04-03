@@ -35,10 +35,7 @@ export default function Header({ onBilgi, onIstatistik, onAyar }) {
         </div>
 
         {/* Logo */}
-        <h1 
-          className="text-xl sm:text-2xl font-bold tracking-tight"
-          style={{ fontFamily: 'var(--font-display)' }}
-        >
+        <h1 className="logo">
           WORDLETR
         </h1>
 

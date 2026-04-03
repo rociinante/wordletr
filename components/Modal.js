@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { sonrakiKelimeyeKalan } from '../lib/kelimeSecici';
+import { useState } from 'react';
 
 export default function Modal({ 
   acik, 
@@ -21,12 +20,12 @@ export default function Modal({
     >
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>
+          <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)', letterSpacing: '0.05em' }}>
             {baslik}
           </h2>
           <button 
             onClick={kapat}
-            className="text-2xl opacity-60 hover:opacity-100 transition-opacity"
+            className="text-2xl opacity-60 hover:opacity-100 transition-opacity w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10"
           >
             ×
           </button>
@@ -44,18 +43,10 @@ export function SonucIcerigi({
   tahminSayisi, 
   istatistik, 
   paylasimMetni,
-  onPaylasim 
+  onYeniOyun,
+  oyunBpiitti = true
 }) {
-  const [kalan, setKalan] = useState(sonrakiKelimeyeKalan());
   const [kopyalandi, setKopyalandi] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setKalan(sonrakiKelimeyeKalan());
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handlePaylas = async () => {
     try {
@@ -82,24 +73,28 @@ export function SonucIcerigi({
 
   return (
     <div className="space-y-6">
-      {/* Sonuç mesajı */}
-      <div className="text-center">
-        {kazandi ? (
-          <>
-            <div className="text-4xl mb-2">🎉</div>
-            <p className="text-lg font-semibold">Tebrikler!</p>
-            <p className="text-sm opacity-70">{tahminSayisi}/6 tahminde bildin</p>
-          </>
-        ) : (
-          <>
-            <div className="text-4xl mb-2">😔</div>
-            <p className="text-lg font-semibold">Maalesef!</p>
-            <p className="text-sm opacity-70">
-              Doğru kelime: <span className="font-bold">{hedefKelime}</span>
-            </p>
-          </>
-        )}
-      </div>
+      {/* Sonuç mesajı - sadece oyun bittiyse göster */}
+      {oyunBpiitti && (
+        <div className="text-center">
+          {kazandi ? (
+            <>
+              <div className="text-5xl mb-3">🎉</div>
+              <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                Tebrikler!
+              </p>
+              <p className="text-sm opacity-70 mt-1">{tahminSayisi}/6 tahminde bildin</p>
+            </>
+          ) : (
+            <>
+              <div className="text-5xl mb-3">😔</div>
+              <p className="text-2xl font-bold">Maalesef!</p>
+              <p className="text-sm opacity-70 mt-2">
+                Doğru kelime: <span className="font-bold text-lg px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white ml-1">{hedefKelime}</span>
+              </p>
+            </>
+          )}
+        </div>
+      )}
 
       {/* İstatistikler */}
       <div className="grid grid-cols-4 gap-2">
@@ -123,14 +118,14 @@ export function SonucIcerigi({
 
       {/* Tahmin dağılımı */}
       <div className="space-y-1.5">
-        <p className="text-sm font-semibold mb-2">Tahmin Dağılımı</p>
+        <p className="text-sm font-semibold mb-3 uppercase tracking-wider opacity-70">Tahmin Dağılımı</p>
         {istatistik.dagilim.map((sayi, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <span className="w-4 text-sm font-medium">{index + 1}</span>
+          <div key={index} className="flex items-center gap-3">
+            <span className="w-5 text-sm font-bold opacity-60">{index + 1}</span>
             <div 
-              className="dagilim-bar flex items-center justify-end px-2 text-sm font-bold text-white"
+              className="dagilim-bar flex items-center justify-end px-3 text-sm font-bold text-white"
               style={{ 
-                width: `${Math.max((sayi / maxDagilim) * 100, 10)}%`,
+                width: `${Math.max((sayi / maxDagilim) * 100, 12)}%`,
               }}
             >
               {sayi}
@@ -139,23 +134,26 @@ export function SonucIcerigi({
         ))}
       </div>
 
-      {/* Sonraki kelime sayacı */}
-      <div className="text-center py-3 rounded-xl" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
-        <p className="text-sm opacity-70 mb-1">Sonraki kelime</p>
-        <p className="saatli-sayi text-2xl font-bold">
-          {String(kalan.saat).padStart(2, '0')}:
-          {String(kalan.dakika).padStart(2, '0')}:
-          {String(kalan.saniye).padStart(2, '0')}
-        </p>
+      {/* Butonlar */}
+      <div className="space-y-3 pt-2">
+        {oyunBpiitti && (
+          <button 
+            onClick={handlePaylas}
+            className="btn-primary w-full"
+          >
+            {kopyalandi ? '✓ Kopyalandı!' : 'Sonucu Paylaş 📤'}
+          </button>
+        )}
+        
+        {oyunBpiitti && onYeniOyun && (
+          <button 
+            onClick={onYeniOyun}
+            className="yeni-oyun-btn w-full"
+          >
+            Yeni Oyun 🎮
+          </button>
+        )}
       </div>
-
-      {/* Paylaş butonu */}
-      <button 
-        onClick={handlePaylas}
-        className="btn-primary w-full"
-      >
-        {kopyalandi ? '✓ Kopyalandı!' : 'Sonucu Paylaş 📤'}
-      </button>
     </div>
   );
 }
@@ -163,32 +161,32 @@ export function SonucIcerigi({
 // Nasıl oynanır içeriği
 export function NasilOynanirIcerigi() {
   return (
-    <div className="space-y-4 text-sm">
-      <p>
-        Günün gizli kelimesini <strong>6 tahmin</strong> hakkında bul!
+    <div className="space-y-5 text-sm">
+      <p className="text-base">
+        Gizli kelimeyi <strong className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">6 tahmin</strong> hakkında bul!
       </p>
       
-      <div className="space-y-2">
-        <p className="font-semibold">Renkler ne anlama gelir?</p>
+      <div className="space-y-3">
+        <p className="font-semibold uppercase tracking-wider opacity-70 text-xs">Renkler ne anlama gelir?</p>
         
-        <div className="flex items-center gap-3">
-          <div className="hucre dogru w-10 h-10 text-lg">A</div>
-          <span>Harf doğru yerde</span>
+        <div className="flex items-center gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+          <div className="hucre dogru w-12 h-12 text-xl">A</div>
+          <span>Harf <strong>doğru yerde</strong></span>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="hucre yerinde w-10 h-10 text-lg">B</div>
-          <span>Harf var ama yanlış yerde</span>
+        <div className="flex items-center gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+          <div className="hucre yerinde w-12 h-12 text-xl">B</div>
+          <span>Harf var ama <strong>yanlış yerde</strong></span>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="hucre yok w-10 h-10 text-lg">C</div>
-          <span>Harf kelimede yok</span>
+        <div className="flex items-center gap-4 p-3 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+          <div className="hucre yok w-12 h-12 text-xl">C</div>
+          <span>Harf kelimede <strong>yok</strong></span>
         </div>
       </div>
 
-      <p className="opacity-70">
-        Her gün gece yarısı yeni bir kelime gelir. Herkes aynı kelimeyi tahmin eder!
+      <p className="opacity-60 text-center pt-2">
+        ✨ Sınırsız oyun — istediğin kadar oyna!
       </p>
     </div>
   );

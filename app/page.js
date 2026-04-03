@@ -7,10 +7,8 @@ import Klavye from '../components/Klavye';
 import UzunlukSecici from '../components/UzunlukSecici';
 import Modal, { SonucIcerigi, NasilOynanirIcerigi } from '../components/Modal';
 import { kontrolEt, klavyeGuncelle, paylasimMetni } from '../lib/oyunMotoru';
-import { gunlukKelime, bugunTarih, gunSayisi, mevcutUzunluklar } from '../lib/kelimeSecici';
+import { rastgeleKelime, mevcutUzunluklar, oyunSayisiGetir, oyunSayisiArtir } from '../lib/kelimeSecici';
 import { 
-  oyunGetir, 
-  oyunKaydet, 
   istatistikGetir, 
   kazandiGuncelle, 
   kaybettiGuncelle 
@@ -27,6 +25,7 @@ export default function Home() {
   const [oyunBitti, setOyunBitti] = useState(false);
   const [kazandi, setKazandi] = useState(false);
   const [sallanim, setSallanim] = useState(false);
+  const [oyunSayisi, setOyunSayisi] = useState(1);
 
   // Modal durumları
   const [bilgiModalAcik, setBilgiModalAcik] = useState(false);
@@ -36,43 +35,25 @@ export default function Home() {
   // İlk yükleme kontrolü
   const [yuklendi, setYuklendi] = useState(false);
 
-  // Oyunu başlat veya kayıtlı oyunu yükle
-  useEffect(() => {
-    const tarih = bugunTarih();
-    const kelime = gunlukKelime(uzunluk);
+  // Yeni oyun başlat
+  const yeniOyunBaslat = useCallback((yeniUzunluk = uzunluk) => {
+    const kelime = rastgeleKelime(yeniUzunluk, hedefKelime);
     setHedefKelime(kelime);
+    setTahminler([]);
+    setSonuclar([]);
+    setMevcutTahmin('');
+    setHarfDurumlari({});
+    setOyunBitti(false);
+    setKazandi(false);
+    setSonucModalAcik(false);
+    setOyunSayisi(oyunSayisiGetir());
+  }, [uzunluk, hedefKelime]);
 
-    // Kayıtlı oyunu kontrol et
-    const kayitliOyun = oyunGetir(tarih, uzunluk);
-    
-    if (kayitliOyun) {
-      setTahminler(kayitliOyun.tahminler);
-      setSonuclar(kayitliOyun.sonuclar);
-      
-      // Klavye durumlarını yeniden hesapla
-      let yeniHarfDurumlari = {};
-      kayitliOyun.tahminler.forEach((tahmin, i) => {
-        yeniHarfDurumlari = klavyeGuncelle(yeniHarfDurumlari, tahmin, kayitliOyun.sonuclar[i]);
-      });
-      setHarfDurumlari(yeniHarfDurumlari);
-      
-      if (kayitliOyun.durum !== 'devam') {
-        setOyunBitti(true);
-        setKazandi(kayitliOyun.durum === 'kazandi');
-        setIstatistik(istatistikGetir());
-      }
-    } else {
-      // Yeni oyun
-      setTahminler([]);
-      setSonuclar([]);
-      setMevcutTahmin('');
-      setHarfDurumlari({});
-      setOyunBitti(false);
-      setKazandi(false);
-    }
-
+  // İlk yükleme
+  useEffect(() => {
+    yeniOyunBaslat(uzunluk);
     setYuklendi(true);
-  }, [uzunluk]);
+  }, []);
 
   // İlk defa oynuyorsa bilgi modalını göster
   useEffect(() => {
@@ -103,7 +84,7 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [oyunBitti, mevcutTahmin, uzunluk, tahminler]);
+  }, [oyunBitti, mevcutTahmin, uzunluk, tahminler, hedefKelime]);
 
   // Harf ekle
   const harfEkle = useCallback((harf) => {
@@ -122,7 +103,6 @@ export default function Home() {
   const tahminGonder = useCallback(() => {
     if (oyunBitti) return;
     if (mevcutTahmin.length !== uzunluk) {
-      // Sallama animasyonu
       setSallanim(true);
       setTimeout(() => setSallanim(false), 500);
       return;
@@ -136,34 +116,26 @@ export default function Home() {
     setSonuclar(yeniSonuclar);
     setMevcutTahmin('');
     
-    // Klavye durumlarını güncelle
     setHarfDurumlari(prev => klavyeGuncelle(prev, mevcutTahmin, sonuc));
 
-    // Oyun durumunu kontrol et
     const dogruMu = mevcutTahmin.toUpperCase() === hedefKelime.toUpperCase();
     
     if (dogruMu) {
-      // Kazandı
       const yeniIstatistik = kazandiGuncelle(yeniTahminler.length);
       setIstatistik(yeniIstatistik);
       setOyunBitti(true);
       setKazandi(true);
-      oyunKaydet(bugunTarih(), uzunluk, yeniTahminler, yeniSonuclar, 'kazandi');
+      oyunSayisiArtir();
       
-      // Animasyon bittikten sonra modal aç
       setTimeout(() => setSonucModalAcik(true), 1500);
     } else if (yeniTahminler.length >= 6) {
-      // Kaybetti
       const yeniIstatistik = kaybettiGuncelle();
       setIstatistik(yeniIstatistik);
       setOyunBitti(true);
       setKazandi(false);
-      oyunKaydet(bugunTarih(), uzunluk, yeniTahminler, yeniSonuclar, 'kaybetti');
+      oyunSayisiArtir();
       
       setTimeout(() => setSonucModalAcik(true), 1500);
-    } else {
-      // Devam
-      oyunKaydet(bugunTarih(), uzunluk, yeniTahminler, yeniSonuclar, 'devam');
     }
   }, [oyunBitti, mevcutTahmin, uzunluk, hedefKelime, tahminler, sonuclar]);
 
@@ -180,19 +152,25 @@ export default function Home() {
 
   // Uzunluk değişimi
   const handleUzunlukDegis = (yeniUzunluk) => {
-    if (tahminler.length > 0) return; // Oyun başladıysa değiştirme
+    if (tahminler.length > 0) return;
     setUzunluk(yeniUzunluk);
+    yeniOyunBaslat(yeniUzunluk);
   };
 
   // Paylaşım metni
   const getPaylasimMetni = () => {
-    return paylasimMetni(tahminler, hedefKelime, gunSayisi());
+    return paylasimMetni(tahminler, hedefKelime, oyunSayisi);
+  };
+
+  // Yeni oyun
+  const handleYeniOyun = () => {
+    yeniOyunBaslat(uzunluk);
   };
 
   if (!yuklendi) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl opacity-50">Yükleniyor...</div>
+        <div className="logo text-3xl animate-pulse">WORDLETR</div>
       </div>
     );
   }
@@ -242,7 +220,7 @@ export default function Home() {
       <Modal
         acik={bilgiModalAcik}
         kapat={() => setBilgiModalAcik(false)}
-        baslik="Nasıl Oynanır?"
+        baslik="NASIL OYNANIR?"
       >
         <NasilOynanirIcerigi />
       </Modal>
@@ -251,7 +229,7 @@ export default function Home() {
       <Modal
         acik={sonucModalAcik}
         kapat={() => setSonucModalAcik(false)}
-        baslik={oyunBitti ? (kazandi ? 'Kazandın! 🎉' : 'Oyun Bitti') : 'İstatistikler'}
+        baslik={oyunBitti ? (kazandi ? 'KAZANDIN! 🎉' : 'OYUN BİTTİ') : 'İSTATİSTİKLER'}
       >
         {istatistik && (
           <SonucIcerigi
@@ -260,6 +238,8 @@ export default function Home() {
             tahminSayisi={tahminler.length}
             istatistik={istatistik}
             paylasimMetni={getPaylasimMetni()}
+            onYeniOyun={handleYeniOyun}
+            oyunBpiitti={oyunBitti}
           />
         )}
       </Modal>
