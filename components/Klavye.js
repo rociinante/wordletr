@@ -1,35 +1,45 @@
 'use client';
 
-const KLAVYE_SATIRLARI = [
+// Türkçe klavye düzeni
+const TURKCE_SATIRLAR = [
   ['E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Ğ', 'Ü'],
   ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ş', 'İ'],
-  ['ENTER', 'Z', 'C', 'V', 'B', 'N', 'M', 'Ö', 'Ç', '⌫']
+  ['ENTER', 'Z', 'C', 'V', 'B', 'N', 'M', 'Ö', 'Ç', 'BACKSPACE']
 ];
 
-export default function Klavye({ onTus, harfDurumlari = {} }) {
-  const handleClick = (tus) => {
-    if (tus === '⌫') {
-      onTus('BACKSPACE');
-    } else {
-      onTus(tus);
-    }
+// İngilizce klavye düzeni
+const INGILIZCE_SATIRLAR = [
+  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+  ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACKSPACE']
+];
+
+export default function Klavye({ onTus, harfDurumlari = {}, ingilizce = false }) {
+  const satirlar = ingilizce ? INGILIZCE_SATIRLAR : TURKCE_SATIRLAR;
+
+  const tusDurumu = (tus) => {
+    if (tus === 'ENTER' || tus === 'BACKSPACE') return '';
+    return harfDurumlari[tus] || '';
   };
 
   return (
-    <div className="flex flex-col gap-1.5 sm:gap-2 w-full max-w-lg mx-auto px-1">
-      {KLAVYE_SATIRLARI.map((satir, satirIndex) => (
-        <div key={satirIndex} className="flex gap-1 sm:gap-1.5 justify-center">
+    <div className="klavye">
+      {satirlar.map((satir, satirIndex) => (
+        <div key={satirIndex} className="klavye-satir">
           {satir.map((tus) => {
-            const durum = harfDurumlari[tus] || '';
-            const ozelTus = tus === 'ENTER' || tus === '⌫';
+            const durum = tusDurumu(tus);
+            const ozelTus = tus === 'ENTER' || tus === 'BACKSPACE';
             
             return (
               <button
                 key={tus}
-                onClick={() => handleClick(tus)}
-                className={`tus ${durum} ${ozelTus ? 'ozel' : ''}`}
+                onClick={() => onTus(tus)}
+                className={`klavye-tus ${durum} ${ozelTus ? 'ozel' : ''}`}
+                style={{
+                  minWidth: ozelTus ? '65px' : '32px',
+                }}
               >
-                {tus}
+                {tus === 'BACKSPACE' ? '⌫' : tus === 'ENTER' ? '↵' : tus}
               </button>
             );
           })}

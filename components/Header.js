@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { temaToggle, temaGetir } from '../lib/depolama';
 
-export default function Header({ onBilgi, onIstatistik, onAyar, onLogoTikla, onLiderlik }) {
+export default function Header({ onBilgi, onIstatistik, onLogoTikla, onLiderlik, onMeydanOkuma }) {
   const [tema, setTema] = useState('dark');
 
   useEffect(() => {
@@ -16,68 +16,57 @@ export default function Header({ onBilgi, onIstatistik, onAyar, onLogoTikla, onL
   };
 
   return (
-    <header 
-      className="w-full border-b py-3 px-4"
-      style={{ borderColor: 'var(--border-color)' }}
-    >
-      <div className="max-w-lg mx-auto flex items-center justify-between">
-        {/* Sol butonlar */}
+    <header className="header">
+      <div className="header-container">
+        {/* Sol taraf - Liderlik ve Meydan Okuma */}
         <div className="flex items-center gap-1">
           <button 
-            onClick={onBilgi}
-            className="p-2 rounded-lg transition-all hover:bg-white/10"
-            aria-label="Nasıl oynanır"
+            onClick={onLiderlik}
+            className="header-btn"
+            title="Liderlik Tablosu"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-            </svg>
+            🏆
           </button>
           <button 
-            onClick={onLiderlik}
-            className="p-2 rounded-lg transition-all hover:bg-white/10"
-            aria-label="Liderlik Tablosu"
+            onClick={onMeydanOkuma}
+            className="header-btn"
+            title="Meydan Okuma"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-2.927 0" />
-            </svg>
+            🎯
           </button>
         </div>
 
-        {/* Logo - Tıklanabilir */}
+        {/* Logo */}
         <button 
           onClick={onLogoTikla}
-          className="logo cursor-pointer hover:scale-105 transition-transform active:scale-95"
-          title="Yeni Oyun"
+          className="logo hover:scale-105 transition-transform cursor-pointer"
+          title="Yeni oyun başlat"
         >
           WORDLETR
         </button>
 
-        {/* Sağ butonlar */}
+        {/* Sağ taraf - Butonlar */}
         <div className="flex items-center gap-1">
           <button 
-            onClick={onIstatistik}
-            className="p-2 rounded-lg transition-all hover:bg-white/10"
-            aria-label="İstatistikler"
+            onClick={onBilgi}
+            className="header-btn"
+            title="Nasıl Oynanır?"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-            </svg>
+            ❓
           </button>
-          
+          <button 
+            onClick={onIstatistik}
+            className="header-btn"
+            title="İstatistikler"
+          >
+            📊
+          </button>
           <button 
             onClick={handleTemaToggle}
-            className="p-2 rounded-lg transition-all hover:bg-white/10"
-            aria-label="Tema değiştir"
+            className="header-btn"
+            title="Tema Değiştir"
           >
-            {tema === 'dark' ? (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-              </svg>
-            )}
+            {tema === 'dark' ? '☀️' : '🌙'}
           </button>
         </div>
       </div>

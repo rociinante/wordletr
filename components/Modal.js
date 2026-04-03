@@ -44,7 +44,10 @@ export function SonucIcerigi({
   istatistik, 
   paylasimMetni,
   onYeniOyun,
-  oyunBpiitti = true
+  oyunBitti = true,
+  mod = 'sinirsiz',
+  timeAttackSkor = 0,
+  merdivenSeviye = 4
 }) {
   const [kopyalandi, setKopyalandi] = useState(false);
 
@@ -73,9 +76,25 @@ export function SonucIcerigi({
 
   return (
     <div className="space-y-6">
-      {oyunBpiitti && (
+      {oyunBitti && (
         <div className="text-center">
-          {kazandi ? (
+          {mod === 'timeattack' ? (
+            <>
+              <div className="text-5xl mb-3">⏱️</div>
+              <p className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">
+                Süre Doldu!
+              </p>
+              <p className="text-4xl font-bold mt-2">{timeAttackSkor} Kelime</p>
+            </>
+          ) : mod === 'merdiven' && kazandi ? (
+            <>
+              <div className="text-5xl mb-3">🪜</div>
+              <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                Merdiveni Tamamladın!
+              </p>
+              <p className="text-sm opacity-70 mt-1">7 harfli kelimeyi bildin!</p>
+            </>
+          ) : kazandi ? (
             <>
               <div className="text-5xl mb-3">🎉</div>
               <p className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
@@ -132,7 +151,7 @@ export function SonucIcerigi({
       </div>
 
       <div className="space-y-3 pt-2">
-        {oyunBpiitti && (
+        {oyunBitti && (
           <button 
             onClick={handlePaylas}
             className="btn-primary w-full"
@@ -141,7 +160,7 @@ export function SonucIcerigi({
           </button>
         )}
         
-        {oyunBpiitti && onYeniOyun && (
+        {oyunBitti && onYeniOyun && (
           <button 
             onClick={onYeniOyun}
             className="yeni-oyun-btn w-full"
@@ -198,39 +217,48 @@ export function LiderlikIcerigi({ liderlik, mevcutKullaniciId, kullaniciAdi, onA
         )}
       </div>
 
-      {/* Liderlik tablosu */}
+      {/* Liderlik tablosu - Top 10 */}
       <div className="space-y-2">
-        <p className="text-xs uppercase tracking-wider opacity-60">🏆 Liderlik Tablosu</p>
+        <p className="text-xs uppercase tracking-wider opacity-60">🏆 Tüm Zamanların En İyileri</p>
         
         {liderlik.length === 0 ? (
           <p className="text-center opacity-50 py-4">Henüz kimse yok. İlk sen ol!</p>
         ) : (
-          <div className="space-y-2 max-h-64 overflow-y-auto">
+          <div className="space-y-2 max-h-80 overflow-y-auto">
             {liderlik.slice(0, 10).map((oyuncu, index) => (
               <div 
                 key={oyuncu.id}
-                className={`flex items-center gap-3 p-3 rounded-xl ${
+                className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
                   oyuncu.id === mevcutKullaniciId 
-                    ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30' 
+                    ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 scale-[1.02]' 
                     : ''
                 }`}
                 style={{ background: oyuncu.id !== mevcutKullaniciId ? 'var(--bg-tertiary)' : undefined }}
               >
-                <span className="text-2xl w-8 text-center">
-                  {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                <span className="text-2xl w-10 text-center">
+                  {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
                 </span>
-                <div className="flex-1">
-                  <p className="font-semibold">{oyuncu.ad}</p>
-                  <p className="text-xs opacity-60">{oyuncu.kazanilan}/{oyuncu.oynanan} oyun • Seri: {oyuncu.seri}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate">
+                    {oyuncu.ad}
+                    {oyuncu.id === mevcutKullaniciId && <span className="text-xs ml-2 opacity-60">(sen)</span>}
+                  </p>
+                  <p className="text-xs opacity-60">
+                    %{oyuncu.oynanan > 0 ? Math.round((oyuncu.kazanilan / oyuncu.oynanan) * 100) : 0} başarı • En uzun seri: {oyuncu.enUzunSeri}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-lg" style={{ color: 'var(--accent)' }}>{oyuncu.puan}</p>
+                  <p className="font-bold text-xl" style={{ color: 'var(--accent)' }}>{oyuncu.puan}</p>
                   <p className="text-xs opacity-60">puan</p>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        <p className="text-xs text-center opacity-40 mt-4">
+          ℹ️ Liderlik tablosu bu cihazda saklanır
+        </p>
       </div>
     </div>
   );
@@ -264,12 +292,19 @@ export function NasilOynanirIcerigi() {
       </div>
 
       <div className="p-3 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
-        <p className="font-semibold text-xs uppercase tracking-wider opacity-70 mb-2">💡 İpucu Sistemi</p>
-        <p className="opacity-80">Başarı oranına göre her oyunda 1-3 ipucu hakkın var. Serin arttıkça bonus ipucu kazanırsın!</p>
+        <p className="font-semibold text-xs uppercase tracking-wider opacity-70 mb-2">🎮 Oyun Modları</p>
+        <div className="space-y-1 text-xs opacity-80">
+          <p>♾️ <strong>Sınırsız:</strong> İstediğin kadar oyna</p>
+          <p>🔥 <strong>Zor:</strong> Bulunan harfleri kullanmak zorunlu</p>
+          <p>⏱️ <strong>Time Attack:</strong> 5 dk'da en fazla kelime</p>
+          <p>🪜 <strong>Merdiven:</strong> 4→7 harf, yanılırsan başa dön</p>
+          <p>💀 <strong>Survival:</strong> Doğru harfte +süre kazan</p>
+          <p>🙈 <strong>Kör:</strong> Renkler yok, sadece sayılar</p>
+        </div>
       </div>
 
       <p className="opacity-60 text-center pt-2">
-        ✨ Sınırsız oyun — istediğin kadar oyna!
+        ✨ Arkadaşlarına meydan oku, sınırlarını zorla!
       </p>
     </div>
   );
@@ -304,6 +339,127 @@ export function KategoriSeciciIcerigi({ kategoriler, mevcutKategori, onKategoriS
             </div>
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+// Mod Seçici İçeriği
+export function ModSeciciIcerigi({ modlar, mevcutMod, onModSec }) {
+  return (
+    <div className="space-y-3">
+      <p className="text-xs uppercase tracking-wider opacity-60 mb-4">Bir mod seç</p>
+      
+      <div className="grid gap-3">
+        {Object.entries(modlar).map(([key, mod]) => (
+          <button
+            key={key}
+            onClick={() => onModSec(key)}
+            className={`p-4 rounded-xl text-left transition-all ${
+              mevcutMod === key 
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                : 'hover:scale-102'
+            }`}
+            style={{ 
+              background: mevcutMod !== key ? 'var(--bg-tertiary)' : undefined,
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{mod.emoji}</span>
+              <div>
+                <p className="font-bold">{mod.isim}</p>
+                <p className="text-xs opacity-70">{mod.aciklama}</p>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Meydan Okuma İçeriği
+export function MeydanOkumaIcerigi({ onLinkOlustur }) {
+  const [kelime, setKelime] = useState('');
+  const [olusturulanLink, setOlusturulanLink] = useState('');
+  const [kopyalandi, setKopyalandi] = useState(false);
+
+  const handleOlustur = () => {
+    if (kelime.trim().length >= 4 && kelime.trim().length <= 7) {
+      const link = onLinkOlustur(kelime.trim().toUpperCase());
+      setOlusturulanLink(link);
+    }
+  };
+
+  const handleKopyala = async () => {
+    try {
+      await navigator.clipboard.writeText(olusturulanLink);
+      setKopyalandi(true);
+      setTimeout(() => setKopyalandi(false), 2000);
+    } catch (e) {
+      console.error('Kopyalama hatası:', e);
+    }
+  };
+
+  const handleWhatsApp = () => {
+    const mesaj = `🎯 Wordletr Meydan Okuma!\n\nBenim kelimemi bulabilecek misin?\n\n${olusturulanLink}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(mesaj)}`, '_blank');
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm opacity-80">
+        Arkadaşlarına meydan oku! Bir kelime belirle, link oluştur ve paylaş.
+      </p>
+
+      <div className="space-y-3">
+        <input
+          type="text"
+          value={kelime}
+          onChange={(e) => {
+            setKelime(e.target.value.replace(/[^a-zA-ZçÇğĞıİöÖşŞüÜ]/g, ''));
+            setOlusturulanLink('');
+          }}
+          maxLength={7}
+          className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 focus:border-purple-500 outline-none text-center text-2xl font-bold uppercase tracking-widest"
+          placeholder="KELİME"
+        />
+        
+        <p className="text-xs text-center opacity-60">
+          4-7 harf arası bir kelime gir
+        </p>
+
+        {!olusturulanLink ? (
+          <button 
+            onClick={handleOlustur}
+            disabled={kelime.trim().length < 4}
+            className={`btn-primary w-full ${kelime.trim().length < 4 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            Link Oluştur 🔗
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <div className="p-3 rounded-xl text-xs break-all" style={{ background: 'var(--bg-tertiary)' }}>
+              {olusturulanLink}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <button 
+                onClick={handleKopyala}
+                className="btn-primary"
+              >
+                {kopyalandi ? '✓ Kopyalandı!' : 'Kopyala 📋'}
+              </button>
+              
+              <button 
+                onClick={handleWhatsApp}
+                className="yeni-oyun-btn flex items-center justify-center gap-2"
+              >
+                WhatsApp 📱
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

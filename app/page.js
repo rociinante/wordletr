@@ -1,13 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../components/Header';
 import Tahta from '../components/Tahta';
 import Klavye from '../components/Klavye';
-import UzunlukSecici from '../components/UzunlukSecici';
-import Modal, { SonucIcerigi, NasilOynanirIcerigi, LiderlikIcerigi, KategoriSeciciIcerigi } from '../components/Modal';
-import { kontrolEt, klavyeGuncelle, paylasimMetni } from '../lib/oyunMotoru';
-import { rastgeleKelimeUzunluklu, kategorileriGetir, mevcutUzunluklar, ipucuHakkiHesapla, ipucuOlustur } from '../lib/kelimeSecici';
+import Modal, { SonucIcerigi, NasilOynanirIcerigi, LiderlikIcerigi, KategoriSeciciIcerigi, ModSeciciIcerigi, MeydanOkumaIcerigi } from '../components/Modal';
+import { kontrolEt, klavyeGuncelle, paylasimMetni, zorModKontrol, korModSonuc } from '../lib/oyunMotoru';
+import { rastgeleKelimeUzunluklu, kategorileriGetir, oyunSayisiGetir, oyunSayisiArtir, ipucuHakkiHesapla, ipucuOlustur, mevcutUzunluklar, kelimeSifrele, kelimeCoz } from '../lib/kelimeSecici';
 import { 
   istatistikGetir, 
   kazandiGuncelle, 
@@ -18,38 +17,21 @@ import {
   liderlikGuncelle
 } from '../lib/depolama';
 
-// Oyun modları
+// Modlar
 const MODLAR = {
-  sinirsiz: { isim: 'Sınırsız', emoji: '♾️', aciklama: 'Sınırsız pratik modu' },
-  zor: { isim: 'Zor Mod', emoji: '🔥', aciklama: 'Bulunan harfler zorunlu' },
-  merdiven: { isim: 'Merdiven', emoji: '🪜', aciklama: '4→5→6→7→8 harf, yanarsın başa dön!' },
-  timeAttack: { isim: 'Zamana Karşı', emoji: '⏱️', aciklama: '5 dakikada kaç kelime?' },
+  sinirsiz: { isim: 'Sınırsız', emoji: '♾️', aciklama: 'İstediğin kadar oyna' },
+  zor: { isim: 'Zor Mod', emoji: '🔥', aciklama: 'Bulunan harfleri kullanmak zorunlu' },
+  timeattack: { isim: 'Time Attack', emoji: '⏱️', aciklama: '5 dakikada en fazla kelime' },
+  merdiven: { isim: 'Merdiven', emoji: '🪜', aciklama: '4→5→6→7 harf, yanılırsan başa dön' },
+  survival: { isim: 'Hayatta Kal', emoji: '💀', aciklama: '60 saniye, doğru harfte +süre' },
+  kor: { isim: 'Kör Mod', emoji: '🙈', aciklama: 'Renkler yok, sadece sayılar' }
 };
 
 export default function Home() {
-  // Oyun modu
-  const [mod, setMod] = useState('sinirsiz');
-  const [modModalAcik, setModModalAcik] = useState(false);
-  
-  // Merdiven modu state
-  const [merdivenSeviye, setMerdivenSeviye] = useState(4);
-  const [merdivenSkor, setMerdivenSkor] = useState(0);
-  
-  // Time Attack state
-  const [timeAttackSure, setTimeAttackSure] = useState(300);
-  const [timeAttackSkor, setTimeAttackSkor] = useState(0);
-  const [timeAttackAktif, setTimeAttackAktif] = useState(false);
-  const timerRef = useRef(null);
-
-  // Challenge modu
-  const [challengeKelime, setChallengeKelime] = useState(null);
-  const [challengeOlusturModalAcik, setChallengeOlusturModalAcik] = useState(false);
-  const [challengeInput, setChallengeInput] = useState('');
-  const [challengeLink, setChallengeLink] = useState('');
-
-  // Temel oyun durumu
+  // Oyun durumu
   const [kategori, setKategori] = useState('klasik');
   const [uzunluk, setUzunluk] = useState(5);
+  const [mod, setMod] = useState('sinirsiz');
   const [hedefKelime, setHedefKelime] = useState('');
   const [tahminler, setTahminler] = useState([]);
   const [sonuclar, setSonuclar] = useState([]);
@@ -58,8 +40,24 @@ export default function Home() {
   const [oyunBitti, setOyunBitti] = useState(false);
   const [kazandi, setKazandi] = useState(false);
   const [sallanim, setSallanim] = useState(false);
-  const [hata, setHata] = useState('');
-  const [oyunBasladi, setOyunBasladi] = useState(false);
+  const [hataMetni, setHataMetni] = useState('');
+  const [oyunSayisi, setOyunSayisi] = useState(1);
+
+  // Meydan okuma
+  const [meydanOkumaModu, setMeydanOkumaModu] = useState(false);
+  const [meydanOkumaKelime, setMeydanOkumaKelime] = useState('');
+
+  // Time Attack & Survival
+  const [kalanSure, setKalanSure] = useState(0);
+  const [timeAttackSkor, setTimeAttackSkor] = useState(0);
+  const [survivalAktif, setSurvivalAktif] = useState(false);
+  const timerRef = useRef(null);
+
+  // Merdiven modu
+  const [merdivenSeviye, setMerdivenSeviye] = useState(4);
+
+  // Kör mod
+  const [korModSonuclar, setKorModSonuclar] = useState([]);
 
   // İpucu durumu
   const [ipucuHakki, setIpucuHakki] = useState(2);
@@ -74,6 +72,8 @@ export default function Home() {
   const [sonucModalAcik, setSonucModalAcik] = useState(false);
   const [liderlikModalAcik, setLiderlikModalAcik] = useState(false);
   const [kategoriModalAcik, setKategoriModalAcik] = useState(false);
+  const [modModalAcik, setModModalAcik] = useState(false);
+  const [meydanOkumaModalAcik, setMeydanOkumaModalAcik] = useState(false);
   const [istatistik, setIstatistik] = useState(null);
   const [kategoriler, setKategoriler] = useState({});
   const [uzunluklar, setUzunluklar] = useState([5]);
@@ -81,18 +81,106 @@ export default function Home() {
   // İlk yükleme kontrolü
   const [yuklendi, setYuklendi] = useState(false);
 
-  // URL'den challenge kelimesini kontrol et
+  // useRef ile fonksiyonları saklıyoruz (klavye için)
+  const harfEkleRef = useRef(null);
+  const harfSilRef = useRef(null);
+  const tahminGonderRef = useRef(null);
+
+  // Timer'ı temizle
+  const timerTemizle = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Yeni oyun başlat
+  const yeniOyunBaslat = useCallback((yeniKategori = kategori, yeniUzunluk = uzunluk, yeniMod = mod) => {
+    timerTemizle();
+    
+    let kelime;
+    let hedefUzunluk = yeniUzunluk;
+    
+    // Merdiven modunda 4 harften başla
+    if (yeniMod === 'merdiven') {
+      hedefUzunluk = 4;
+      setMerdivenSeviye(4);
+    }
+    
+    kelime = rastgeleKelimeUzunluklu(yeniKategori, hedefUzunluk, hedefKelime);
+    
+    setHedefKelime(kelime);
+    setTahminler([]);
+    setSonuclar([]);
+    setKorModSonuclar([]);
+    setMevcutTahmin('');
+    setHarfDurumlari({});
+    setOyunBitti(false);
+    setKazandi(false);
+    setSonucModalAcik(false);
+    setOyunSayisi(oyunSayisiGetir());
+    setKullanilanIpucu([]);
+    setHataMetni('');
+    setMeydanOkumaModu(false);
+    setTimeAttackSkor(0);
+    setSurvivalAktif(false);
+    
+    // İpucu hakkını hesapla
+    const ist = istatistikGetir();
+    setIpucuHakki(ipucuHakkiHesapla(ist));
+
+    // Time Attack: 5 dakika
+    if (yeniMod === 'timeattack') {
+      setKalanSure(300);
+      timerRef.current = setInterval(() => {
+        setKalanSure(prev => {
+          if (prev <= 1) {
+            timerTemizle();
+            setOyunBitti(true);
+            setTimeout(() => setSonucModalAcik(true), 500);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    
+    // Survival: 60 saniye
+    if (yeniMod === 'survival') {
+      setKalanSure(60);
+      setSurvivalAktif(true);
+      timerRef.current = setInterval(() => {
+        setKalanSure(prev => {
+          if (prev <= 1) {
+            timerTemizle();
+            setSurvivalAktif(false);
+            setOyunBitti(true);
+            setKazandi(false);
+            setTimeout(() => setSonucModalAcik(true), 500);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+  }, [kategori, uzunluk, mod, hedefKelime, timerTemizle]);
+
+  // URL'den meydan okuma kelimesini kontrol et
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      const challenge = params.get('c');
-      if (challenge) {
-        try {
-          const decoded = atob(challenge);
-          setChallengeKelime(decoded.toUpperCase());
-          setMod('challenge');
-        } catch (e) {
-          console.error('Challenge decode hatası');
+      const sifreliKelime = params.get('m');
+      
+      if (sifreliKelime) {
+        const cozulmusKelime = kelimeCoz(sifreliKelime);
+        if (cozulmusKelime) {
+          setMeydanOkumaModu(true);
+          setMeydanOkumaKelime(cozulmusKelime);
+          setHedefKelime(cozulmusKelime);
+          setUzunluk(cozulmusKelime.length);
+          
+          // URL'i temizle
+          window.history.replaceState({}, '', window.location.pathname);
         }
       }
     }
@@ -104,172 +192,70 @@ export default function Home() {
     setKategoriler(kat);
     setKullanici(kullaniciGetir());
     setLiderlik(liderlikGetir());
+    setUzunluklar(mevcutUzunluklar('klasik'));
     
-    const uzunlukListesi = mevcutUzunluklar('klasik');
-    setUzunluklar(uzunlukListesi);
+    // Meydan okuma modu değilse normal başla
+    if (!meydanOkumaModu) {
+      const kelime = rastgeleKelimeUzunluklu('klasik', 5, '');
+      setHedefKelime(kelime);
+    }
     
     const ist = istatistikGetir();
     setIpucuHakki(ipucuHakkiHesapla(ist));
-    setIstatistik(ist);
+    setOyunSayisi(oyunSayisiGetir());
     
     setYuklendi(true);
-  }, []);
+    
+    return () => timerTemizle();
+  }, [timerTemizle, meydanOkumaModu]);
 
   // İlk defa oynuyorsa bilgi modalını göster
   useEffect(() => {
-    if (yuklendi && !challengeKelime) {
+    if (yuklendi) {
       const ilkOyun = localStorage.getItem('wordletr_ilk_oyun');
       if (!ilkOyun) {
         setBilgiModalAcik(true);
         localStorage.setItem('wordletr_ilk_oyun', 'true');
       }
     }
-  }, [yuklendi, challengeKelime]);
+  }, [yuklendi]);
 
-  // Time Attack timer
-  useEffect(() => {
-    if (timeAttackAktif && timeAttackSure > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeAttackSure(prev => {
-          if (prev <= 1) {
-            clearInterval(timerRef.current);
-            setTimeAttackAktif(false);
-            setOyunBitti(true);
-            setTimeout(() => setSonucModalAcik(true), 500);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [timeAttackAktif]);
-
-  // Oyun başlat
-  const oyunuBaslat = (yeniUzunluk) => {
-    let kelime;
-    let secilenUzunluk = yeniUzunluk || uzunluk;
-    
-    if (challengeKelime) {
-      kelime = challengeKelime;
-      secilenUzunluk = challengeKelime.length;
-    } else if (mod === 'merdiven') {
-      kelime = rastgeleKelimeUzunluklu(kategori, merdivenSeviye, hedefKelime);
-      secilenUzunluk = merdivenSeviye;
-    } else if (mod === 'timeAttack') {
-      kelime = rastgeleKelimeUzunluklu(kategori, 5, hedefKelime);
-      secilenUzunluk = 5;
-      if (!timeAttackAktif) {
-        setTimeAttackSure(300);
-        setTimeAttackSkor(0);
-        setTimeAttackAktif(true);
-      }
-    } else {
-      kelime = rastgeleKelimeUzunluklu(kategori, secilenUzunluk, hedefKelime);
-    }
-    
-    setUzunluk(secilenUzunluk);
-    setHedefKelime(kelime);
-    setTahminler([]);
-    setSonuclar([]);
-    setMevcutTahmin('');
-    setHarfDurumlari({});
-    setOyunBitti(false);
-    setKazandi(false);
-    setSonucModalAcik(false);
-    setKullanilanIpucu([]);
-    setHata('');
-    setOyunBasladi(true);
-    
-    const ist = istatistikGetir();
-    setIpucuHakki(ipucuHakkiHesapla(ist));
-  };
-
-  // Klavye girişlerini dinle
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!oyunBasladi || oyunBitti) return;
-      if (e.ctrlKey || e.metaKey || e.altKey) return;
-      
-      const key = e.key;
-      
-      if (key === 'Enter') {
-        e.preventDefault();
-        handleTahminGonder();
-      } else if (key === 'Backspace') {
-        e.preventDefault();
-        handleHarfSil();
-      } else {
-        const upperKey = key.toUpperCase();
-        const tumHarfler = 'ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZWXQ';
-        
-        if (tumHarfler.includes(upperKey)) {
-          e.preventDefault();
-          handleHarfEkle(upperKey);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  });
-
-  // Harf ekle
-  const handleHarfEkle = (harf) => {
-    if (oyunBitti || !hedefKelime) return;
+  // Harf ekle fonksiyonu
+  harfEkleRef.current = (harf) => {
+    if (oyunBitti) return;
+    if (!hedefKelime) return;
     if (mevcutTahmin.length >= hedefKelime.length) return;
     setMevcutTahmin(prev => prev + harf);
-    setHata('');
+    setHataMetni('');
   };
 
-  // Harf sil
-  const handleHarfSil = () => {
+  // Harf sil fonksiyonu
+  harfSilRef.current = () => {
     if (oyunBitti) return;
     setMevcutTahmin(prev => prev.slice(0, -1));
-    setHata('');
+    setHataMetni('');
   };
 
-  // Zor mod kontrolü
-  const zorModKontrol = (tahmin) => {
-    if (mod !== 'zor') return true;
-    
-    for (let i = 0; i < sonuclar.length; i++) {
-      const oncekiTahmin = tahminler[i];
-      const oncekiSonuc = sonuclar[i];
-      
-      for (let j = 0; j < oncekiSonuc.length; j++) {
-        const durum = oncekiSonuc[j];
-        const harf = oncekiTahmin[j];
-        
-        if (durum === 'dogru' && tahmin[j] !== harf) {
-          setHata(`${j + 1}. harf ${harf} olmalı!`);
-          return false;
-        }
-        
-        if (durum === 'yerinde' && !tahmin.includes(harf)) {
-          setHata(`${harf} harfi kullanılmalı!`);
-          return false;
-        }
-      }
-    }
-    
-    return true;
-  };
-
-  // Tahmin gönder
-  const handleTahminGonder = () => {
-    if (oyunBitti || !hedefKelime) return;
+  // Tahmin gönder fonksiyonu
+  tahminGonderRef.current = () => {
+    if (oyunBitti) return;
+    if (!hedefKelime) return;
     if (mevcutTahmin.length !== hedefKelime.length) {
       setSallanim(true);
+      setHataMetni(`${hedefKelime.length} harf girmelisin!`);
       setTimeout(() => setSallanim(false), 500);
-      setHata(`${hedefKelime.length} harf girmelisin!`);
       return;
     }
 
-    if (!zorModKontrol(mevcutTahmin)) {
-      setSallanim(true);
-      setTimeout(() => setSallanim(false), 500);
-      return;
+    // Zor mod kontrolü
+    if (mod === 'zor' && tahminler.length > 0) {
+      const zorKontrol = zorModKontrol(mevcutTahmin, tahminler, sonuclar);
+      if (!zorKontrol.gecerli) {
+        setSallanim(true);
+        setHataMetni(zorKontrol.mesaj);
+        setTimeout(() => setSallanim(false), 500);
+        return;
+      }
     }
 
     const sonuc = kontrolEt(mevcutTahmin, hedefKelime);
@@ -279,77 +265,117 @@ export default function Home() {
     setTahminler(yeniTahminler);
     setSonuclar(yeniSonuclar);
     setMevcutTahmin('');
-    setHata('');
+    
+    // Kör mod için özel sonuç
+    if (mod === 'kor') {
+      const korSonuc = korModSonuc(sonuc);
+      setKorModSonuclar(prev => [...prev, korSonuc]);
+    }
     
     setHarfDurumlari(prev => klavyeGuncelle(prev, mevcutTahmin, sonuc));
+
+    // Survival modunda doğru harf için süre ekle
+    if (mod === 'survival' && survivalAktif) {
+      const dogruHarfSayisi = sonuc.filter(s => s === 'dogru').length;
+      const mevcutHarfSayisi = sonuc.filter(s => s === 'mevcut').length;
+      const ekSure = dogruHarfSayisi * 10 + mevcutHarfSayisi * 5;
+      if (ekSure > 0) {
+        setKalanSure(prev => Math.min(prev + ekSure, 120));
+      }
+    }
 
     const dogruMu = mevcutTahmin.toUpperCase() === hedefKelime.toUpperCase();
     
     if (dogruMu) {
-      if (mod === 'merdiven') {
-        setMerdivenSkor(prev => prev + 1);
-        if (merdivenSeviye < 8) {
-          setMerdivenSeviye(prev => prev + 1);
-          setTimeout(() => {
-            const yeniKelime = rastgeleKelimeUzunluklu(kategori, merdivenSeviye + 1, hedefKelime);
-            setHedefKelime(yeniKelime);
-            setUzunluk(merdivenSeviye + 1);
-            setTahminler([]);
-            setSonuclar([]);
-            setHarfDurumlari({});
-            setKullanilanIpucu([]);
-          }, 1000);
-          return;
-        } else {
-          setOyunBitti(true);
-          setKazandi(true);
-        }
-      } else if (mod === 'timeAttack') {
+      // Time Attack: devam et
+      if (mod === 'timeattack') {
         setTimeAttackSkor(prev => prev + 1);
-        setTimeout(() => {
-          const yeniKelime = rastgeleKelimeUzunluklu(kategori, 5, hedefKelime);
+        const yeniKelime = rastgeleKelimeUzunluklu(kategori, uzunluk, hedefKelime);
+        setHedefKelime(yeniKelime);
+        setTahminler([]);
+        setSonuclar([]);
+        setKorModSonuclar([]);
+        setHarfDurumlari({});
+        return;
+      }
+      
+      // Merdiven: sonraki seviye
+      if (mod === 'merdiven') {
+        if (merdivenSeviye < 7) {
+          const yeniSeviye = merdivenSeviye + 1;
+          setMerdivenSeviye(yeniSeviye);
+          const yeniKelime = rastgeleKelimeUzunluklu(kategori, yeniSeviye, hedefKelime);
           setHedefKelime(yeniKelime);
           setTahminler([]);
           setSonuclar([]);
+          setKorModSonuclar([]);
           setHarfDurumlari({});
-          setKullanilanIpucu([]);
-        }, 500);
-        return;
-      } else {
-        const yeniIstatistik = kazandiGuncelle(yeniTahminler.length);
-        setIstatistik(yeniIstatistik);
-        setOyunBitti(true);
-        setKazandi(true);
-        setLiderlik(liderlikGuncelle());
+          return;
+        }
       }
+
+      const yeniIstatistik = kazandiGuncelle(yeniTahminler.length);
+      setIstatistik(yeniIstatistik);
+      setOyunBitti(true);
+      setKazandi(true);
+      timerTemizle();
+      oyunSayisiArtir();
+      setLiderlik(liderlikGuncelle());
       
       setTimeout(() => setSonucModalAcik(true), 1500);
     } else if (yeniTahminler.length >= 6) {
+      // Merdiven: başa dön
       if (mod === 'merdiven') {
         setMerdivenSeviye(4);
-        setMerdivenSkor(0);
+        const yeniKelime = rastgeleKelimeUzunluklu(kategori, 4, hedefKelime);
+        setHedefKelime(yeniKelime);
+        setTahminler([]);
+        setSonuclar([]);
+        setKorModSonuclar([]);
+        setHarfDurumlari({});
+        setHataMetni('Yanıldın! 4 harfe geri dönüyorsun...');
+        setTimeout(() => setHataMetni(''), 2000);
+        return;
       }
+
+      const yeniIstatistik = kaybettiGuncelle();
+      setIstatistik(yeniIstatistik);
+      setOyunBitti(true);
+      setKazandi(false);
+      timerTemizle();
+      oyunSayisiArtir();
+      setLiderlik(liderlikGuncelle());
       
-      if (mod !== 'timeAttack') {
-        const yeniIstatistik = kaybettiGuncelle();
-        setIstatistik(yeniIstatistik);
-        setOyunBitti(true);
-        setKazandi(false);
-        setLiderlik(liderlikGuncelle());
-        
-        setTimeout(() => setSonucModalAcik(true), 1500);
-      } else {
-        setTimeout(() => {
-          const yeniKelime = rastgeleKelimeUzunluklu(kategori, 5, hedefKelime);
-          setHedefKelime(yeniKelime);
-          setTahminler([]);
-          setSonuclar([]);
-          setHarfDurumlari({});
-          setKullanilanIpucu([]);
-        }, 500);
-      }
+      setTimeout(() => setSonucModalAcik(true), 1500);
     }
   };
+
+  // Klavye girişlerini dinle
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (oyunBitti) return;
+      
+      // Modal açıkken klavyeyi devre dışı bırak
+      if (bilgiModalAcik || sonucModalAcik || liderlikModalAcik || kategoriModalAcik || modModalAcik || meydanOkumaModalAcik) {
+        return;
+      }
+      
+      const key = e.key.toUpperCase();
+      
+      if (key === 'ENTER') {
+        e.preventDefault();
+        if (tahminGonderRef.current) tahminGonderRef.current();
+      } else if (key === 'BACKSPACE') {
+        e.preventDefault();
+        if (harfSilRef.current) harfSilRef.current();
+      } else if (/^[A-ZÇĞİÖŞÜ]$/.test(key)) {
+        if (harfEkleRef.current) harfEkleRef.current(key);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [oyunBitti, bilgiModalAcik, sonucModalAcik, liderlikModalAcik, kategoriModalAcik, modModalAcik, meydanOkumaModalAcik]);
 
   // İpucu kullan
   const ipucuKullan = () => {
@@ -362,14 +388,14 @@ export default function Home() {
     }
   };
 
-  // Sanal klavye
+  // Sanal klavye girişi
   const handleKlavye = (tus) => {
     if (tus === 'ENTER') {
-      handleTahminGonder();
+      if (tahminGonderRef.current) tahminGonderRef.current();
     } else if (tus === 'BACKSPACE') {
-      handleHarfSil();
+      if (harfSilRef.current) harfSilRef.current();
     } else {
-      handleHarfEkle(tus);
+      if (harfEkleRef.current) harfEkleRef.current(tus);
     }
   };
 
@@ -377,78 +403,21 @@ export default function Home() {
   const handleKategoriDegis = (yeniKategori) => {
     setKategori(yeniKategori);
     setKategoriModalAcik(false);
-    
-    const yeniUzunluklar = mevcutUzunluklar(yeniKategori);
-    setUzunluklar(yeniUzunluklar);
-    
-    if (!yeniUzunluklar.includes(uzunluk)) {
-      setUzunluk(yeniUzunluklar[0] || 5);
-    }
-    
-    setOyunBasladi(false);
+    setUzunluklar(mevcutUzunluklar(yeniKategori));
+    yeniOyunBaslat(yeniKategori, uzunluk, mod);
   };
 
   // Uzunluk değişimi
   const handleUzunlukDegis = (yeniUzunluk) => {
     setUzunluk(yeniUzunluk);
+    yeniOyunBaslat(kategori, yeniUzunluk, mod);
   };
 
   // Mod değişimi
   const handleModDegis = (yeniMod) => {
     setMod(yeniMod);
     setModModalAcik(false);
-    setOyunBasladi(false);
-    
-    if (yeniMod === 'merdiven') {
-      setMerdivenSeviye(4);
-      setMerdivenSkor(0);
-    } else if (yeniMod === 'timeAttack') {
-      setTimeAttackSure(300);
-      setTimeAttackSkor(0);
-      setTimeAttackAktif(false);
-    }
-  };
-
-  // Logo tıklama
-  const handleLogoTikla = () => {
-    if (mod === 'timeAttack') {
-      clearInterval(timerRef.current);
-      setTimeAttackAktif(false);
-    }
-    setOyunBasladi(false);
-    setOyunBitti(false);
-    setChallengeKelime(null);
-    setMod('sinirsiz');
-    setMerdivenSeviye(4);
-    setMerdivenSkor(0);
-    
-    if (typeof window !== 'undefined') {
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  };
-
-  // Challenge link oluştur
-  const challengeLinkOlustur = () => {
-    if (challengeInput.length < 4 || challengeInput.length > 8) {
-      setHata('Kelime 4-8 harf arası olmalı!');
-      return;
-    }
-    
-    const encoded = btoa(challengeInput.toUpperCase());
-    const link = `${window.location.origin}${window.location.pathname}?c=${encoded}`;
-    setChallengeLink(link);
-    setHata('');
-  };
-
-  // Challenge linkini kopyala
-  const challengeLinkKopyala = async () => {
-    try {
-      await navigator.clipboard.writeText(challengeLink);
-      setHata('Link kopyalandı!');
-      setTimeout(() => setHata(''), 2000);
-    } catch (e) {
-      console.error('Kopyalama hatası');
-    }
+    yeniOyunBaslat(kategori, uzunluk, yeniMod);
   };
 
   // Kullanıcı adı değişimi
@@ -458,26 +427,32 @@ export default function Home() {
     setLiderlik(liderlikGuncelle());
   };
 
-  // Yeni oyun
-  const handleYeniOyun = () => {
-    setSonucModalAcik(false);
-    setOyunBasladi(false);
-    setChallengeKelime(null);
-    
-    if (mod === 'merdiven') {
-      setMerdivenSeviye(4);
-      setMerdivenSkor(0);
-    }
+  // Logo tıklama - oyunu sıfırla
+  const handleLogoTikla = () => {
+    yeniOyunBaslat(kategori, uzunluk, mod);
+  };
+
+  // Meydan okuma linki oluştur
+  const meydanOkumaLinkiOlustur = (kelime) => {
+    const sifreliKelime = kelimeSifrele(kelime);
+    const url = `${window.location.origin}${window.location.pathname}?m=${sifreliKelime}`;
+    return url;
   };
 
   // Paylaşım metni
   const getPaylasimMetni = () => {
-    let modText = '';
-    if (mod === 'merdiven') modText = ` 🪜 Merdiven Seviye ${merdivenSeviye}`;
-    if (mod === 'timeAttack') modText = ` ⏱️ Time Attack: ${timeAttackSkor} kelime`;
-    if (mod === 'zor') modText = ' 🔥 Zor Mod';
-    
-    return paylasimMetni(tahminler, hedefKelime, 1) + modText;
+    if (mod === 'timeattack') {
+      return `Wordletr ⏱️ Time Attack\n${timeAttackSkor} kelime bildim!\n\nhttps://wordletr.vercel.app`;
+    }
+    if (mod === 'merdiven') {
+      return `Wordletr 🪜 Merdiven\n${merdivenSeviye} harfe ulaştım!\n\nhttps://wordletr.vercel.app`;
+    }
+    return paylasimMetni(tahminler, hedefKelime, oyunSayisi);
+  };
+
+  // Yeni oyun
+  const handleYeniOyun = () => {
+    yeniOyunBaslat(kategori, uzunluk, mod);
   };
 
   // Süre formatla
@@ -511,213 +486,190 @@ export default function Home() {
           setLiderlik(liderlikGetir());
           setLiderlikModalAcik(true);
         }}
+        onMeydanOkuma={() => setMeydanOkumaModalAcik(true)}
       />
 
-      <main className="flex-1 flex flex-col items-center py-4 px-2 max-w-lg mx-auto w-full">
-        
-        {/* Oyun başlamadan - seçim ekranı */}
-        {!oyunBasladi && !challengeKelime && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-6 w-full px-4">
-            <h2 className="text-2xl font-bold text-center" style={{ fontFamily: 'var(--font-display)' }}>
-              Oyun Ayarları
-            </h2>
-            
-            {/* Mod Seçimi */}
-            <div className="w-full">
-              <p className="text-sm opacity-60 mb-2">Oyun Modu</p>
-              <button 
-                onClick={() => setModModalAcik(true)}
-                className="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl transition-all hover:scale-102"
-                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{mevcutModInfo.emoji}</span>
-                  <div className="text-left">
-                    <p className="font-semibold">{mevcutModInfo.isim}</p>
-                    <p className="text-xs opacity-60">{mevcutModInfo.aciklama}</p>
-                  </div>
-                </div>
-                <span className="opacity-50">▼</span>
-              </button>
+      <main className="flex-1 flex flex-col items-center justify-between py-4 px-2 max-w-lg mx-auto w-full">
+        {/* Üst kontroller */}
+        <div className="w-full space-y-3 mb-4">
+          {/* Kategori, Mod ve Uzunluk */}
+          <div className="flex items-center justify-between gap-2 px-2">
+            <button 
+              onClick={() => setKategoriModalAcik(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:scale-105 text-sm"
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+            >
+              <span>{mevcutKategoriInfo.emoji}</span>
+              <span className="font-semibold">{mevcutKategoriInfo.isim}</span>
+            </button>
+
+            <button 
+              onClick={() => setModModalAcik(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:scale-105 text-sm"
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+            >
+              <span>{mevcutModInfo.emoji}</span>
+              <span className="font-semibold">{mevcutModInfo.isim}</span>
+            </button>
+
+            <button 
+              onClick={ipucuKullan}
+              disabled={ipucuHakki <= 0 || oyunBitti || mod === 'kor'}
+              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all text-sm ${
+                ipucuHakki > 0 && !oyunBitti && mod !== 'kor' ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
+              }`}
+              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+            >
+              <span>💡</span>
+              <span className="font-semibold">{ipucuHakki}</span>
+            </button>
+          </div>
+
+          {/* Uzunluk seçici */}
+          {mod !== 'merdiven' && (
+            <div className="flex items-center justify-center gap-2">
+              {[4, 5, 6, 7].map(u => (
+                <button
+                  key={u}
+                  onClick={() => handleUzunlukDegis(u)}
+                  className={`w-10 h-10 rounded-xl font-bold transition-all ${
+                    uzunluk === u 
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white scale-110' 
+                      : 'hover:scale-105'
+                  }`}
+                  style={{ 
+                    background: uzunluk !== u ? 'var(--bg-secondary)' : undefined,
+                    border: '1px solid var(--border-color)'
+                  }}
+                >
+                  {u}
+                </button>
+              ))}
             </div>
-            
-            {/* Kategori Seçimi */}
-            <div className="w-full">
-              <p className="text-sm opacity-60 mb-2">Kategori</p>
-              <button 
-                onClick={() => setKategoriModalAcik(true)}
-                className="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl transition-all hover:scale-102"
-                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{mevcutKategoriInfo.emoji}</span>
-                  <span className="font-semibold">{mevcutKategoriInfo.isim}</span>
+          )}
+
+          {/* Merdiven seviye göstergesi */}
+          {mod === 'merdiven' && (
+            <div className="flex items-center justify-center gap-2">
+              {[4, 5, 6, 7].map(s => (
+                <div
+                  key={s}
+                  className={`w-10 h-10 rounded-xl font-bold flex items-center justify-center transition-all ${
+                    merdivenSeviye === s 
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white scale-110' 
+                      : merdivenSeviye > s
+                        ? 'bg-green-500/30 text-green-400'
+                        : 'opacity-30'
+                  }`}
+                  style={{ border: '1px solid var(--border-color)' }}
+                >
+                  {s}
                 </div>
-                <span className="opacity-50">▼</span>
-              </button>
+              ))}
             </div>
-            
-            {/* Harf Uzunluğu Seçimi */}
-            {mod !== 'merdiven' && mod !== 'timeAttack' && (
-              <div className="w-full">
-                <p className="text-sm opacity-60 mb-2">Harf Sayısı</p>
-                <UzunlukSecici
-                  uzunluklar={uzunluklar}
-                  secili={uzunluk}
-                  onChange={handleUzunlukDegis}
-                />
+          )}
+
+          {/* Timer göstergesi */}
+          {(mod === 'timeattack' || mod === 'survival') && (
+            <div className="flex items-center justify-center gap-4">
+              <div className={`px-4 py-2 rounded-xl font-mono text-2xl font-bold ${
+                kalanSure <= 10 ? 'text-red-500 animate-pulse' : ''
+              }`} style={{ background: 'var(--bg-secondary)' }}>
+                {sureFormatla(kalanSure)}
               </div>
-            )}
-            
-            {/* Meydan Okuma Oluştur */}
-            <button 
-              onClick={() => setChallengeOlusturModalAcik(true)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl transition-all hover:scale-102"
-              style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)' }}
-            >
-              <span>🎯</span>
-              <span className="font-semibold text-white">Arkadaşına Meydan Oku!</span>
-            </button>
-            
-            {/* Başla Butonu */}
-            <button 
-              onClick={() => oyunuBaslat(uzunluk)}
-              className="btn-primary w-full text-xl py-4"
-            >
-              {mod === 'merdiven' ? '🪜 Merdivene Başla!' : 
-               mod === 'timeAttack' ? '⏱️ Zamana Karşı Başla!' :
-               '🎮 Oyuna Başla!'}
-            </button>
+              {mod === 'timeattack' && (
+                <div className="px-4 py-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
+                  <span className="text-sm opacity-70">Skor: </span>
+                  <span className="font-bold text-xl">{timeAttackSkor}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Meydan okuma bildirimi */}
+          {meydanOkumaModu && (
+            <div className="px-4 py-2 rounded-xl text-center text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+              🎯 Meydan Okuma Modu — Arkadaşının kelimesini bul!
+            </div>
+          )}
+        </div>
+
+        {/* İpucu gösterimi */}
+        {kullanilanIpucu.length > 0 && (
+          <div className="w-full mb-4 px-2">
+            {kullanilanIpucu.map((ipucu, i) => (
+              <div 
+                key={i}
+                className="px-4 py-2 rounded-xl mb-2 text-center text-sm font-semibold"
+                style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #a855f7 100%)', color: 'white' }}
+              >
+                💡 {ipucu.mesaj}
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Oyun başladı */}
-        {(oyunBasladi || challengeKelime) && (
-          <>
-            {/* Üst bilgi barı */}
-            <div className="w-full flex items-center justify-between mb-2 px-2">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{mevcutKategoriInfo.emoji}</span>
-                <span className="font-semibold text-sm">{mevcutKategoriInfo.isim}</span>
-                {mod !== 'sinirsiz' && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-bold" 
-                    style={{ background: 'var(--accent)', color: 'white' }}>
-                    {mevcutModInfo.emoji} {mevcutModInfo.isim}
-                  </span>
-                )}
+        {/* Kör mod sonuçları */}
+        {mod === 'kor' && korModSonuclar.length > 0 && (
+          <div className="w-full mb-4 px-2">
+            {korModSonuclar.map((sonuc, i) => (
+              <div 
+                key={i}
+                className="px-4 py-2 rounded-xl mb-2 text-center text-sm font-semibold"
+                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+              >
+                🔢 {sonuc.dogruYer} doğru yerde, {sonuc.yanliyer} yanlış yerde
               </div>
-
-              <div className="flex items-center gap-2">
-                {mod === 'merdiven' && (
-                  <span className="px-3 py-1 rounded-full text-sm font-bold"
-                    style={{ background: 'var(--bg-secondary)' }}>
-                    🪜 {merdivenSeviye} harf • Skor: {merdivenSkor}
-                  </span>
-                )}
-                
-                {mod === 'timeAttack' && (
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${timeAttackSure < 30 ? 'animate-pulse' : ''}`}
-                    style={{ background: timeAttackSure < 30 ? '#ef4444' : 'var(--bg-secondary)', color: timeAttackSure < 30 ? 'white' : 'inherit' }}>
-                    ⏱️ {sureFormatla(timeAttackSure)} • {timeAttackSkor} kelime
-                  </span>
-                )}
-                
-                <button 
-                  onClick={ipucuKullan}
-                  disabled={ipucuHakki <= 0 || oyunBitti}
-                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-all ${
-                    ipucuHakki > 0 && !oyunBitti ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
-                  }`}
-                  style={{ background: 'var(--bg-secondary)' }}
-                >
-                  <span>💡</span>
-                  <span className="font-bold">{ipucuHakki}</span>
-                </button>
-              </div>
-            </div>
-
-            {challengeKelime && (
-              <div className="w-full mb-2 px-2">
-                <div className="px-4 py-2 rounded-xl text-center text-sm font-semibold"
-                  style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)', color: 'white' }}>
-                  🎯 Meydan Okuma! {challengeKelime.length} harfli kelimeyi bul!
-                </div>
-              </div>
-            )}
-
-            {hata && (
-              <div className="w-full mb-2 px-2">
-                <div className="px-4 py-2 rounded-xl text-center text-sm font-semibold"
-                  style={{ background: '#ef4444', color: 'white' }}>
-                  {hata}
-                </div>
-              </div>
-            )}
-
-            {kullanilanIpucu.length > 0 && (
-              <div className="w-full mb-2 px-2">
-                {kullanilanIpucu.map((ipucu, i) => (
-                  <div 
-                    key={i}
-                    className="px-4 py-2 rounded-xl mb-1 text-center text-sm font-semibold"
-                    style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #a855f7 100%)', color: 'white' }}
-                  >
-                    💡 {ipucu.mesaj}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex-1 flex items-center justify-center py-2">
-              <Tahta
-                tahminler={tahminler}
-                sonuclar={sonuclar}
-                mevcutTahmin={mevcutTahmin}
-                uzunluk={hedefKelime?.length || uzunluk}
-                sallanim={sallanim}
-              />
-            </div>
-
-            <div className="w-full mt-auto pb-2">
-              <Klavye
-                onTus={handleKlavye}
-                harfDurumlari={harfDurumlari}
-              />
-            </div>
-          </>
+            ))}
+          </div>
         )}
+
+        {/* Hata metni */}
+        {hataMetni && (
+          <div className="w-full mb-2 px-2">
+            <div className="px-4 py-2 rounded-xl text-center text-sm font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
+              {hataMetni}
+            </div>
+          </div>
+        )}
+
+        {/* Oyun tahtası */}
+        <div className="flex-1 flex items-center">
+          <Tahta
+            tahminler={tahminler}
+            sonuclar={mod === 'kor' ? sonuclar.map(() => ['bos', 'bos', 'bos', 'bos', 'bos', 'bos', 'bos'].slice(0, hedefKelime?.length || 5)) : sonuclar}
+            mevcutTahmin={mevcutTahmin}
+            uzunluk={hedefKelime?.length || uzunluk}
+            sallanim={sallanim}
+          />
+        </div>
+
+        {/* Klavye */}
+        <div className="w-full mt-auto pb-2">
+          <Klavye
+            onTus={handleKlavye}
+            harfDurumlari={mod === 'kor' ? {} : harfDurumlari}
+            ingilizce={kategori === 'english'}
+          />
+        </div>
       </main>
 
-      {/* Modaller */}
-      <Modal acik={bilgiModalAcik} kapat={() => setBilgiModalAcik(false)} baslik="NASIL OYNANIR?">
+      {/* Bilgi modalı */}
+      <Modal
+        acik={bilgiModalAcik}
+        kapat={() => setBilgiModalAcik(false)}
+        baslik="NASIL OYNANIR?"
+      >
         <NasilOynanirIcerigi />
       </Modal>
 
+      {/* Sonuç modalı */}
       <Modal
         acik={sonucModalAcik}
         kapat={() => setSonucModalAcik(false)}
-        baslik={
-          mod === 'timeAttack' ? `⏱️ SÜRE BİTTİ!` :
-          mod === 'merdiven' && kazandi && merdivenSeviye === 8 ? '🏆 MERDİVEN TAMAMLANDI!' :
-          oyunBitti ? (kazandi ? 'KAZANDIN! 🎉' : 'OYUN BİTTİ') : 'İSTATİSTİKLER'
-        }
+        baslik={oyunBitti ? (kazandi ? '🎉 KAZANDIN!' : 'OYUN BİTTİ') : 'İSTATİSTİKLER'}
       >
-        {mod === 'timeAttack' ? (
-          <div className="text-center space-y-4">
-            <div className="text-6xl mb-4">⏱️</div>
-            <p className="text-3xl font-bold">{timeAttackSkor} kelime!</p>
-            <p className="opacity-60">5 dakikada {timeAttackSkor} kelime buldun!</p>
-            <button onClick={handleYeniOyun} className="btn-primary w-full mt-4">Tekrar Dene 🔄</button>
-          </div>
-        ) : mod === 'merdiven' && kazandi && merdivenSeviye === 8 ? (
-          <div className="text-center space-y-4">
-            <div className="text-6xl mb-4">🏆</div>
-            <p className="text-3xl font-bold">Tebrikler!</p>
-            <p className="opacity-60">Tüm merdiveni tamamladın!</p>
-            <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>Skor: {merdivenSkor}</p>
-            <button onClick={handleYeniOyun} className="btn-primary w-full mt-4">Yeni Merdiven 🪜</button>
-          </div>
-        ) : istatistik && (
+        {istatistik && (
           <SonucIcerigi
             kazandi={kazandi}
             hedefKelime={hedefKelime}
@@ -725,12 +677,20 @@ export default function Home() {
             istatistik={istatistik}
             paylasimMetni={getPaylasimMetni()}
             onYeniOyun={handleYeniOyun}
-            oyunBpiitti={oyunBitti}
+            oyunBitti={oyunBitti}
+            mod={mod}
+            timeAttackSkor={timeAttackSkor}
+            merdivenSeviye={merdivenSeviye}
           />
         )}
       </Modal>
 
-      <Modal acik={liderlikModalAcik} kapat={() => setLiderlikModalAcik(false)} baslik="🏆 LİDERLİK TABLOSU">
+      {/* Liderlik modalı */}
+      <Modal
+        acik={liderlikModalAcik}
+        kapat={() => setLiderlikModalAcik(false)}
+        baslik="🏆 LİDERLİK TABLOSU"
+      >
         <LiderlikIcerigi
           liderlik={liderlik}
           mevcutKullaniciId={kullanici.id}
@@ -739,7 +699,12 @@ export default function Home() {
         />
       </Modal>
 
-      <Modal acik={kategoriModalAcik} kapat={() => setKategoriModalAcik(false)} baslik="KATEGORİ SEÇ">
+      {/* Kategori modalı */}
+      <Modal
+        acik={kategoriModalAcik}
+        kapat={() => setKategoriModalAcik(false)}
+        baslik="KATEGORİ SEÇ"
+      >
         <KategoriSeciciIcerigi
           kategoriler={kategoriler}
           mevcutKategori={kategori}
@@ -747,75 +712,28 @@ export default function Home() {
         />
       </Modal>
 
-      <Modal acik={modModalAcik} kapat={() => setModModalAcik(false)} baslik="OYUN MODU SEÇ">
-        <div className="space-y-3">
-          {Object.entries(MODLAR).map(([key, modInfo]) => (
-            <button
-              key={key}
-              onClick={() => handleModDegis(key)}
-              className={`w-full p-4 rounded-xl text-left transition-all ${mod === key ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : 'hover:scale-102'}`}
-              style={{ background: mod !== key ? 'var(--bg-tertiary)' : undefined }}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{modInfo.emoji}</span>
-                <div>
-                  <p className="font-bold">{modInfo.isim}</p>
-                  <p className="text-xs opacity-70">{modInfo.aciklama}</p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
+      {/* Mod modalı */}
+      <Modal
+        acik={modModalAcik}
+        kapat={() => setModModalAcik(false)}
+        baslik="OYUN MODU"
+      >
+        <ModSeciciIcerigi
+          modlar={MODLAR}
+          mevcutMod={mod}
+          onModSec={handleModDegis}
+        />
       </Modal>
 
+      {/* Meydan Okuma modalı */}
       <Modal
-        acik={challengeOlusturModalAcik}
-        kapat={() => { setChallengeOlusturModalAcik(false); setChallengeInput(''); setChallengeLink(''); setHata(''); }}
-        baslik="🎯 MEYDAN OKUMA OLUŞTUR"
+        acik={meydanOkumaModalAcik}
+        kapat={() => setMeydanOkumaModalAcik(false)}
+        baslik="🎯 MEYDAN OKUMA"
       >
-        <div className="space-y-4">
-          <p className="text-sm opacity-70">Bir kelime gir ve arkadaşlarına meydan oku!</p>
-          
-          <input
-            type="text"
-            value={challengeInput}
-            onChange={(e) => setChallengeInput(e.target.value.toUpperCase().replace(/[^A-ZÇĞİÖŞÜ]/g, ''))}
-            maxLength={8}
-            placeholder="Kelimeyi gir (4-8 harf)"
-            className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 focus:border-purple-500 outline-none text-center text-xl font-bold tracking-widest"
-          />
-          
-          {challengeLink ? (
-            <div className="space-y-3">
-              <p className="text-sm text-green-400 font-semibold">✅ Link hazır!</p>
-              <div className="p-3 rounded-lg bg-black/20 break-all text-sm">{challengeLink}</div>
-              <button onClick={challengeLinkKopyala} className="btn-primary w-full">📋 Linki Kopyala</button>
-              <button 
-                onClick={() => {
-                  const text = `🎯 Wordletr'da sana meydan okuyorum!\n\nBu ${challengeInput.length} harfli kelimeyi bulabilecek misin?\n\n${challengeLink}`;
-                  if (navigator.share) {
-                    navigator.share({ text });
-                  } else {
-                    navigator.clipboard.writeText(text);
-                  }
-                }}
-                className="yeni-oyun-btn w-full"
-              >
-                📤 Paylaş
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={challengeLinkOlustur}
-              disabled={challengeInput.length < 4}
-              className="btn-primary w-full disabled:opacity-50"
-            >
-              Link Oluştur 🔗
-            </button>
-          )}
-          
-          {hata && <p className="text-sm text-center text-green-400">{hata}</p>}
-        </div>
+        <MeydanOkumaIcerigi
+          onLinkOlustur={meydanOkumaLinkiOlustur}
+        />
       </Modal>
     </div>
   );
