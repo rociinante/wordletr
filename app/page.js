@@ -43,6 +43,10 @@ export default function Home() {
   const [hataMetni, setHataMetni] = useState('');
   const [oyunSayisi, setOyunSayisi] = useState(1);
 
+  // Kelime anlamı
+  const [kelimeAnlami, setKelimeAnlami] = useState(null);
+  const [anlamYukleniyor, setAnlamYukleniyor] = useState(false);
+
   // Meydan okuma
   const [meydanOkumaModu, setMeydanOkumaModu] = useState(false);
   const [meydanOkumaKelime, setMeydanOkumaKelime] = useState('');
@@ -124,6 +128,7 @@ export default function Home() {
     setMeydanOkumaModu(false);
     setTimeAttackSkor(0);
     setSurvivalAktif(false);
+    setKelimeAnlami(null);
     
     // İpucu hakkını hesapla
     const ist = istatistikGetir();
@@ -368,8 +373,12 @@ export default function Home() {
       } else if (key === 'BACKSPACE') {
         e.preventDefault();
         if (harfSilRef.current) harfSilRef.current();
-      } else if (/^[A-ZÇĞİÖŞÜ]$/.test(key)) {
-        if (harfEkleRef.current) harfEkleRef.current(key);
+      } else if (/^[A-ZÇĞİÖŞÜIı]$/i.test(key)) {
+        // I ve ı harflerini düzelt
+        let harf = key;
+        if (harf === 'I') harf = 'I';
+        if (harf === 'ı' || harf === 'Ι') harf = 'I';
+        if (harfEkleRef.current) harfEkleRef.current(harf.toUpperCase());
       }
     };
 
@@ -464,7 +473,7 @@ export default function Home() {
 
   if (!yuklendi) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen min-h-[100dvh] flex items-center justify-center">
         <div className="logo text-3xl animate-pulse">WORDLETR</div>
       </div>
     );
@@ -474,7 +483,7 @@ export default function Home() {
   const mevcutModInfo = MODLAR[mod] || MODLAR.sinirsiz;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col">
       <Header 
         onBilgi={() => setBilgiModalAcik(true)}
         onIstatistik={() => {
@@ -489,120 +498,107 @@ export default function Home() {
         onMeydanOkuma={() => setMeydanOkumaModalAcik(true)}
       />
 
-      <main className="flex-1 flex flex-col items-center justify-between py-4 px-2 max-w-lg mx-auto w-full">
-        {/* Üst kontroller */}
-        <div className="w-full space-y-3 mb-4">
-          {/* Kategori, Mod ve Uzunluk */}
-          <div className="flex items-center justify-between gap-2 px-2">
-            <button 
-              onClick={() => setKategoriModalAcik(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:scale-105 text-sm"
-              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
-            >
-              <span>{mevcutKategoriInfo.emoji}</span>
-              <span className="font-semibold">{mevcutKategoriInfo.isim}</span>
-            </button>
-
-            <button 
-              onClick={() => setModModalAcik(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all hover:scale-105 text-sm"
-              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
-            >
-              <span>{mevcutModInfo.emoji}</span>
-              <span className="font-semibold">{mevcutModInfo.isim}</span>
-            </button>
-
-            <button 
-              onClick={ipucuKullan}
-              disabled={ipucuHakki <= 0 || oyunBitti || mod === 'kor'}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all text-sm ${
-                ipucuHakki > 0 && !oyunBitti && mod !== 'kor' ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
-              }`}
-              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
-            >
-              <span>💡</span>
-              <span className="font-semibold">{ipucuHakki}</span>
-            </button>
-          </div>
-
-          {/* Uzunluk seçici */}
-          {mod !== 'merdiven' && (
-            <div className="flex items-center justify-center gap-2">
-              {[4, 5, 6, 7].map(u => (
-                <button
-                  key={u}
-                  onClick={() => handleUzunlukDegis(u)}
-                  className={`w-10 h-10 rounded-xl font-bold transition-all ${
-                    uzunluk === u 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white scale-110' 
-                      : 'hover:scale-105'
-                  }`}
-                  style={{ 
-                    background: uzunluk !== u ? 'var(--bg-secondary)' : undefined,
-                    border: '1px solid var(--border-color)'
-                  }}
-                >
-                  {u}
-                </button>
-              ))}
+      <main className="flex-1 flex flex-col items-center py-4 px-4 max-w-xl mx-auto w-full">
+        
+        {/* ÜST MENÜ - Mod ve Kategori Yazılı */}
+        <div className="top-menu w-full">
+          {/* Kategori */}
+          <button 
+            onClick={() => setKategoriModalAcik(true)}
+            className="menu-item"
+          >
+            <span className="emoji">{mevcutKategoriInfo.emoji}</span>
+            <div className="flex flex-col items-start">
+              <span className="label">Kategori</span>
+              <span className="value">{mevcutKategoriInfo.isim}</span>
             </div>
-          )}
+          </button>
 
-          {/* Merdiven seviye göstergesi */}
-          {mod === 'merdiven' && (
-            <div className="flex items-center justify-center gap-2">
-              {[4, 5, 6, 7].map(s => (
-                <div
-                  key={s}
-                  className={`w-10 h-10 rounded-xl font-bold flex items-center justify-center transition-all ${
-                    merdivenSeviye === s 
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white scale-110' 
-                      : merdivenSeviye > s
-                        ? 'bg-green-500/30 text-green-400'
-                        : 'opacity-30'
-                  }`}
-                  style={{ border: '1px solid var(--border-color)' }}
-                >
-                  {s}
-                </div>
-              ))}
+          {/* Mod */}
+          <button 
+            onClick={() => setModModalAcik(true)}
+            className="menu-item"
+          >
+            <span className="emoji">{mevcutModInfo.emoji}</span>
+            <div className="flex flex-col items-start">
+              <span className="label">Mod</span>
+              <span className="value">{mevcutModInfo.isim}</span>
             </div>
-          )}
+          </button>
 
-          {/* Timer göstergesi */}
-          {(mod === 'timeattack' || mod === 'survival') && (
-            <div className="flex items-center justify-center gap-4">
-              <div className={`px-4 py-2 rounded-xl font-mono text-2xl font-bold ${
-                kalanSure <= 10 ? 'text-red-500 animate-pulse' : ''
-              }`} style={{ background: 'var(--bg-secondary)' }}>
-                {sureFormatla(kalanSure)}
-              </div>
-              {mod === 'timeattack' && (
-                <div className="px-4 py-2 rounded-xl" style={{ background: 'var(--bg-secondary)' }}>
-                  <span className="text-sm opacity-70">Skor: </span>
-                  <span className="font-bold text-xl">{timeAttackSkor}</span>
-                </div>
-              )}
+          {/* İpucu */}
+          <button 
+            onClick={ipucuKullan}
+            disabled={ipucuHakki <= 0 || oyunBitti || mod === 'kor'}
+            className={`menu-item ${ipucuHakki <= 0 || oyunBitti || mod === 'kor' ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <span className="emoji">💡</span>
+            <div className="flex flex-col items-start">
+              <span className="label">İpucu</span>
+              <span className="value">{ipucuHakki} Hak</span>
             </div>
-          )}
-
-          {/* Meydan okuma bildirimi */}
-          {meydanOkumaModu && (
-            <div className="px-4 py-2 rounded-xl text-center text-sm font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white">
-              🎯 Meydan Okuma Modu — Arkadaşının kelimesini bul!
-            </div>
-          )}
+          </button>
         </div>
+
+        {/* Uzunluk seçici */}
+        {mod !== 'merdiven' && (
+          <div className="length-selector w-full my-3">
+            {[4, 5, 6, 7].map(u => (
+              <button
+                key={u}
+                onClick={() => handleUzunlukDegis(u)}
+                className={`length-btn ${uzunluk === u ? 'active' : ''}`}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Merdiven seviye göstergesi */}
+        {mod === 'merdiven' && (
+          <div className="ladder-indicator w-full my-3">
+            {[4, 5, 6, 7].map(s => (
+              <div
+                key={s}
+                className={`ladder-step ${
+                  merdivenSeviye === s ? 'current' : 
+                  merdivenSeviye > s ? 'completed' : 'upcoming'
+                }`}
+              >
+                {s}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Timer göstergesi */}
+        {(mod === 'timeattack' || mod === 'survival') && (
+          <div className="flex items-center justify-center gap-4 my-3">
+            <div className={`timer-display ${kalanSure <= 10 ? 'warning' : ''}`}>
+              {sureFormatla(kalanSure)}
+            </div>
+            {mod === 'timeattack' && (
+              <div className="timer-display">
+                <span className="text-sm opacity-70 mr-2">Skor:</span>
+                <span>{timeAttackSkor}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Meydan okuma bildirimi */}
+        {meydanOkumaModu && (
+          <div className="hint-box w-full my-3">
+            🎯 Meydan Okuma — Arkadaşının kelimesini bul!
+          </div>
+        )}
 
         {/* İpucu gösterimi */}
         {kullanilanIpucu.length > 0 && (
-          <div className="w-full mb-4 px-2">
+          <div className="w-full my-2">
             {kullanilanIpucu.map((ipucu, i) => (
-              <div 
-                key={i}
-                className="px-4 py-2 rounded-xl mb-2 text-center text-sm font-semibold"
-                style={{ background: 'linear-gradient(135deg, var(--accent) 0%, #a855f7 100%)', color: 'white' }}
-              >
+              <div key={i} className="hint-box mb-2">
                 💡 {ipucu.mesaj}
               </div>
             ))}
@@ -611,14 +607,13 @@ export default function Home() {
 
         {/* Kör mod sonuçları */}
         {mod === 'kor' && korModSonuclar.length > 0 && (
-          <div className="w-full mb-4 px-2">
+          <div className="w-full my-2">
             {korModSonuclar.map((sonuc, i) => (
               <div 
                 key={i}
-                className="px-4 py-2 rounded-xl mb-2 text-center text-sm font-semibold"
-                style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+                className="menu-item justify-center mb-2"
               >
-                🔢 {sonuc.dogruYer} doğru yerde, {sonuc.yanliyer} yanlış yerde
+                🔢 <strong>{sonuc.dogruYer}</strong> doğru yerde, <strong>{sonuc.yanliyer}</strong> yanlış yerde
               </div>
             ))}
           </div>
@@ -626,18 +621,16 @@ export default function Home() {
 
         {/* Hata metni */}
         {hataMetni && (
-          <div className="w-full mb-2 px-2">
-            <div className="px-4 py-2 rounded-xl text-center text-sm font-semibold bg-red-500/20 text-red-400 border border-red-500/30">
-              {hataMetni}
-            </div>
+          <div className="error-box w-full my-2">
+            {hataMetni}
           </div>
         )}
 
         {/* Oyun tahtası */}
-        <div className="flex-1 flex items-center">
+        <div className="flex-1 flex items-center justify-center py-4">
           <Tahta
             tahminler={tahminler}
-            sonuclar={mod === 'kor' ? sonuclar.map(() => ['bos', 'bos', 'bos', 'bos', 'bos', 'bos', 'bos'].slice(0, hedefKelime?.length || 5)) : sonuclar}
+            sonuclar={mod === 'kor' ? sonuclar.map(() => Array(hedefKelime?.length || 5).fill('bos')) : sonuclar}
             mevcutTahmin={mevcutTahmin}
             uzunluk={hedefKelime?.length || uzunluk}
             sallanim={sallanim}
@@ -645,7 +638,7 @@ export default function Home() {
         </div>
 
         {/* Klavye */}
-        <div className="w-full mt-auto pb-2">
+        <div className="w-full mt-auto">
           <Klavye
             onTus={handleKlavye}
             harfDurumlari={mod === 'kor' ? {} : harfDurumlari}
@@ -658,7 +651,7 @@ export default function Home() {
       <Modal
         acik={bilgiModalAcik}
         kapat={() => setBilgiModalAcik(false)}
-        baslik="NASIL OYNANIR?"
+        baslik="Nasıl Oynanır?"
       >
         <NasilOynanirIcerigi />
       </Modal>
@@ -667,7 +660,7 @@ export default function Home() {
       <Modal
         acik={sonucModalAcik}
         kapat={() => setSonucModalAcik(false)}
-        baslik={oyunBitti ? (kazandi ? '🎉 KAZANDIN!' : 'OYUN BİTTİ') : 'İSTATİSTİKLER'}
+        baslik={oyunBitti ? (kazandi ? '🎉 Tebrikler!' : 'Oyun Bitti') : 'İstatistikler'}
       >
         {istatistik && (
           <SonucIcerigi
@@ -689,7 +682,7 @@ export default function Home() {
       <Modal
         acik={liderlikModalAcik}
         kapat={() => setLiderlikModalAcik(false)}
-        baslik="🏆 LİDERLİK TABLOSU"
+        baslik="🏆 Liderlik Tablosu"
       >
         <LiderlikIcerigi
           liderlik={liderlik}
@@ -703,7 +696,7 @@ export default function Home() {
       <Modal
         acik={kategoriModalAcik}
         kapat={() => setKategoriModalAcik(false)}
-        baslik="KATEGORİ SEÇ"
+        baslik="Kategori Seç"
       >
         <KategoriSeciciIcerigi
           kategoriler={kategoriler}
@@ -716,7 +709,7 @@ export default function Home() {
       <Modal
         acik={modModalAcik}
         kapat={() => setModModalAcik(false)}
-        baslik="OYUN MODU"
+        baslik="Oyun Modu"
       >
         <ModSeciciIcerigi
           modlar={MODLAR}
@@ -729,7 +722,7 @@ export default function Home() {
       <Modal
         acik={meydanOkumaModalAcik}
         kapat={() => setMeydanOkumaModalAcik(false)}
-        baslik="🎯 MEYDAN OKUMA"
+        baslik="🎯 Meydan Okuma"
       >
         <MeydanOkumaIcerigi
           onLinkOlustur={meydanOkumaLinkiOlustur}

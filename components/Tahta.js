@@ -48,7 +48,7 @@ export default function Tahta({
     satirlar.push(
       <div 
         key={i} 
-        className={`flex gap-1.5 sm:gap-2 justify-center ${satirAnimasyonu}`}
+        className={`satir ${sallanim && i === tahminler.length ? 'sallanim' : ''}`}
       >
         {harfler}
       </div>
@@ -56,7 +56,7 @@ export default function Tahta({
   }
 
   return (
-    <div className="flex flex-col gap-1.5 sm:gap-2 p-2">
+    <div className="tahta">
       {satirlar}
     </div>
   );

@@ -3,36 +3,43 @@
 import { useEffect, useState } from 'react';
 
 export default function Hucre({ harf, durum, index, animasyonGecikme = 0 }) {
-  const [animasyonlu, setAnimasyonlu] = useState(false);
   const [gosterilecekDurum, setGosterilecekDurum] = useState(null);
+  const [animasyonBasladi, setAnimasyonBasladi] = useState(false);
 
   useEffect(() => {
-    if (durum) {
-      // Flip animasyonu için gecikme
+    if (durum && durum !== 'bos') {
+      // Animasyon gecikmesi
       const timer = setTimeout(() => {
-        setAnimasyonlu(true);
+        setAnimasyonBasladi(true);
+        // Animasyonun ortasında rengi değiştir
         setTimeout(() => {
           setGosterilecekDurum(durum);
-        }, 250); // Animasyonun yarısında renk değiştir
+        }, 200);
       }, animasyonGecikme);
 
       return () => clearTimeout(timer);
     } else {
-      setAnimasyonlu(false);
+      setAnimasyonBasladi(false);
       setGosterilecekDurum(null);
     }
   }, [durum, animasyonGecikme]);
 
-  const durumClass = gosterilecekDurum || '';
-  const doluClass = harf ? 'dolu' : '';
-  const flipClass = animasyonlu ? 'animate-flip' : '';
+  // Class'ları oluştur
+  const classes = ['hucre'];
+  
+  if (harf) {
+    classes.push('dolu');
+  }
+  
+  if (gosterilecekDurum) {
+    classes.push(gosterilecekDurum);
+  }
 
   return (
     <div 
-      className={`hucre ${durumClass} ${doluClass} ${flipClass}`}
+      className={classes.join(' ')}
       style={{ 
-        animationDelay: `${animasyonGecikme}ms`,
-        perspective: '1000px'
+        animationDelay: animasyonBasladi ? `${animasyonGecikme}ms` : '0ms'
       }}
     >
       {harf || ''}
