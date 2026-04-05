@@ -1,0 +1,123 @@
+{
+  "kategoriler": {
+    "klasik": {
+      "isim": "Klasik",
+      "emoji": "📖",
+      "aciklama": "Genel Türkçe kelimeler"
+    },
+    "filmler": {
+      "isim": "Filmler",
+      "emoji": "🎬",
+      "aciklama": "Film ve dizi isimleri"
+    },
+    "futbol": {
+      "isim": "Futbol",
+      "emoji": "⚽",
+      "aciklama": "Futbolcu isimleri"
+    },
+    "sehirler": {
+      "isim": "Şehirler",
+      "emoji": "🏙️",
+      "aciklama": "Türkiye şehirleri"
+    },
+    "muzik": {
+      "isim": "Müzik",
+      "emoji": "🎵",
+      "aciklama": "Şarkıcı ve müzisyenler"
+    },
+    "english": {
+      "isim": "English",
+      "emoji": "🇬🇧",
+      "aciklama": "Practice English words"
+    }
+  },
+  "klasik": {
+    "4": [
+      "aşık", "balı", "cami", "dağı", "elif", "fare", "gece", "hava", "inci", "jale",
+      "kale", "lale", "masa", "nane", "okul", "para", "renk", "saat", "taze", "uzak",
+      "vadi", "yağı", "zarf", "açık", "baba", "ceza", "dolu", "ekim", "golf", "jest",
+      "hata", "ilan", "kafa", "lira", "mavi", "nota", "oyun", "peri", "rota", "dans",
+      "sıra", "tarz", "uçak", "vize", "yeni", "zeka", "asıl", "cilt", "doğa", "erik"
+    ],
+    "5": [
+      "adres", "akşam", "altın", "annem", "arada", "arkam", "aslım", "aşkım", "baban", "bahçe",
+      "balık", "banka", "başka", "bayır", "bilgi", "biraz", "bölge", "boyut", "bulut", "büyük",
+      "cadde", "çanta", "çarşı", "çevre", "çiçek", "çizgi", "dalga", "daire", "değer", "deniz",
+      "devam", "diğer", "diken", "dilek", "direk", "dizin", "doğal", "dokuz", "dolap", "durum",
+      "dünya", "duvar", "düzen", "ekran", "elmas", "erken", "etraf", "evren", "eylem", "fidan",
+      "filiz", "final", "forma", "forum", "genel", "geniş", "giriş", "gizli", "görev", "görüş",
+      "güçlü", "güneş", "güven", "hafif", "hakem", "haklı", "hasar", "havan", "hayat", "hızlı",
+      "insan", "işlem", "kabul", "kadın", "kağıt", "kalıp", "kanal", "kapak", "kaplı", "kamus",
+      "karşı", "katar", "kayıp", "kazan", "kenar", "kıdem", "kitap", "köprü", "kural", "kuzey",
+      "kurum", "lamba", "lider", "liman", "maden", "mahal", "makam", "marka", "merak", "mesaj",
+      "metal", "metre", "mimar", "model", "motor", "müdür", "müzik", "nehir", "nokta", "noter",
+      "paket", "panel", "pasta", "pazar", "perde", "plaka", "plato", "proje", "radar", "radyo",
+      "rakam", "rapor", "reçel", "resim", "robot", "roman", "saban", "sabah", "sahil", "sahne",
+      "salon", "sanat", "savaş", "sebep", "seçim", "sedir", "sefer", "serin", "sesli", "sevgi",
+      "seyir", "sıfır", "sınav", "sınır", "siren", "soğuk", "sokak", "sonra", "sonuç", "süreç",
+      "tabak", "tablo", "talep", "tanım", "tarif", "tatil", "tarih", "taşra", "tekil", "temel",
+      "tenis", "tepki", "teras", "toplu", "tutum", "tuzak", "ürünü", "üzeri", "vagon", "vakit",
+      "vatan", "video", "yatak", "yazar", "yemek", "yılan", "yolcu", "yorum", "yudum", "zaman"
+    ],
+    "6": [
+      "abajur", "açılış", "adapte", "ahengi", "akvary", "alışık", "amaçlı", "anahta", "anlayı", "asalet",
+      "ateşli", "ayakkı", "bağıms", "bakıcı", "balkon", "başarı", "bedeni", "belirt", "biçimi", "bilgis",
+      "birlik", "boyutu", "bozulm", "buluşm", "büyülü", "caddel", "çalışm", "çarpıc", "çekici", "çeşitl",
+      "çözüml", "dalyan", "damacı", "danışm", "değişi", "deneme", "dernek", "destek", "devlet", "dikkat",
+      "dolmuş", "dönüşü", "düşünc", "efsane", "eğitim", "doruk", "finans", "güncel", "heykel", "hikaye"
+    ],
+    "7": [
+      "abonelik", "açıklam", "akademik", "aktarım", "algoritm", "alternat", "animasyo", "anlaşmak", "araştır", "arkeoloj",
+      "atmosfer", "bağımsız", "başlangı", "belirsiz", "bilinçli", "çalışkan", "çevresel", "değerlen", "demokrat", "deneysel",
+      "dönüştür", "eğlencel", "ekonomik", "eleştiri", "etkinlik", "geleneks", "güvenlik", "hesaplam", "hizmetli", "iletişim",
+      "imkanlar", "inceleme", "internet", "işletmec", "karakter", "katılımc", "kolaylık", "kültürel", "kurumsal", "liderlik"
+    ]
+  },
+  "filmler": {
+    "4": ["jaws", "dune", "coco", "cars", "hugo", "room", "chef", "leon", "troy", "argo"],
+    "5": ["joker", "rocky", "alien", "bambi", "dumbo", "fargo", "ghost", "giant", "heidi", "logan",
+          "rambo", "shrek", "signs", "spawn", "speed", "split", "storm", "taken", "titan", "tommy",
+          "venom", "virus", "zombi", "ocean", "pearl", "queen", "siren", "tenet", "focus", "seven"],
+    "6": ["avatar", "matrix", "narcos", "frozen", "psycho", "scream", "grease", "zodiac", "gladya", "hobbit"],
+    "7": ["titanic", "aladdin", "arrival", "dunkirk", "gravity", "hancock", "ironman", "monster", "silence", "inferno"]
+  },
+  "futbol": {
+    "4": ["pele", "xavi", "kaka", "owen", "zico", "best", "deco", "reus", "arda", "hagi"],
+    "5": ["messi", "henry", "giggs", "keane", "vidic", "terry", "villa", "silva", "hakan", "burak",
+          "volka", "nihat", "metin", "tanju", "fatih", "şenol", "sahin", "toure", "caval", "neuer"],
+    "6": ["neymar", "hazard", "modric", "buffon", "zidane", "mesuti", "robben", "suarez", "cavani", "aguero"],
+    "7": ["ronaldo", "beckham", "rivaldo", "platini", "cruyff", "maldini", "pirlo", "gerrard", "lampard", "rooney"]
+  },
+  "sehirler": {
+    "4": ["rize", "bolu", "uşak", "kars", "ağrı", "ordu", "iğdı", "muşa", "vana", "tony"],
+    "5": ["adana", "bursa", "düzce", "izmir", "kilis", "konya", "muğla", "niğde", "sinop", "sivas",
+          "tokat", "aydın", "çorum", "hatay", "maras", "bingö", "bitli", "elazı", "malatı", "mardin"],
+    "6": ["ankara", "antalı", "trabzo", "denizl", "kayser", "balıke", "tekird", "çanakk", "erzuru", "samsun"],
+    "7": ["istanbu", "gaziant", "diyarbı", "şanlıur", "erzurum", "mersini", "kocaeli", "eskişeh", "sakaryı", "antalya"]
+  },
+  "muzik": {
+    "4": ["ajda", "sıla", "mert", "berk", "elif", "adel", "cher", "pink", "zedd", "avic"],
+    "5": ["tarkan", "sezen", "hadis", "murat", "kenan", "demet", "hande", "emrah", "ferdi", "rafet",
+          "teoman", "yavuz", "orhan", "serda", "sertab", "gülben", "şebnem", "nil", "simge", "beren"],
+    "6": ["tarkan", "sertab", "gülben", "hülya", "şebnem", "ziynet", "aleyna", "berkay", "bengu", "simge"],
+    "7": ["mustafa", "kayahan", "nilüfer", "ebru", "şebnem", "hadise", "aleyna", "gülşen", "mercan", "bengü"]
+  },
+  "english": {
+    "4": ["love", "life", "work", "time", "home", "book", "city", "food", "game", "play",
+          "hope", "dream", "star", "moon", "rain", "wind", "fire", "tree", "bird", "fish",
+          "bear", "wolf", "lion", "king", "hero", "gold", "blue", "pink", "gray", "dark",
+          "fast", "slow", "cool", "warm", "cold", "nice", "good", "best", "more", "true"],
+    "5": ["happy", "world", "dream", "music", "water", "light", "power", "smile", "heart", "peace",
+          "storm", "ocean", "river", "cloud", "earth", "plant", "stone", "metal", "glass", "brain",
+          "think", "learn", "teach", "write", "speak", "dance", "laugh", "shine", "bloom", "brave",
+          "smart", "quick", "quiet", "sweet", "fresh", "clean", "clear", "sharp", "house", "child",
+          "woman", "human", "angel", "ghost", "magic", "truth", "faith", "grace", "honor", "glory"],
+    "6": ["family", "friend", "nature", "beauty", "golden", "silver", "purple", "orange", "winter", "summer",
+          "spring", "autumn", "sunset", "forest", "garden", "island", "bridge", "castle", "palace", "dragon",
+          "wizard", "knight", "prince", "spirit", "wonder", "memory", "secret", "wisdom", "gentle", "kindly",
+          "lovely", "warmly", "softly", "slowly", "deeply", "highly", "simply", "really", "mostly", "nearly"],
+    "7": ["freedom", "courage", "journey", "mystery", "harmony", "rainbow", "thunder", "diamond", "crystal", "emerald",
+          "phoenix", "unicorn", "warrior", "captain", "general", "emperor", "goddess", "miracle", "promise", "eternal",
+          "endless", "perfect", "amazing", "awesome", "magical", "special", "welcome", "fantasy", "destiny", "forever"]
+  }
+}
