@@ -503,19 +503,20 @@ export default function Home() {
         return;
       }
       
-      const key = e.key.toUpperCase();
+      const key = e.key;
       
-      if (key === 'ENTER') {
+      if (key === 'Enter') {
         e.preventDefault();
         if (tahminGonderRef.current) tahminGonderRef.current();
-      } else if (key === 'BACKSPACE') {
+      } else if (key === 'Backspace') {
         e.preventDefault();
         if (harfSilRef.current) harfSilRef.current();
-      } else if (/^[A-ZÇĞİÖŞÜIı]$/i.test(key)) {
-        let harf = key;
-        if (harf === 'I') harf = 'I';
-        if (harf === 'ı' || harf === 'Ι') harf = 'I';
-        if (harfEkleRef.current) harfEkleRef.current(harf.toUpperCase());
+      } else if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(key)) {
+        let harf = key.toUpperCase();
+        // Türkçe i/İ dönüşümü
+        if (key === 'i') harf = 'İ';  // küçük i -> büyük İ
+        if (key === 'ı') harf = 'I';  // küçük ı -> büyük I
+        if (harfEkleRef.current) harfEkleRef.current(harf);
       }
     };
 

@@ -332,25 +332,27 @@ body {
 .klavye {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  max-width: 540px;
+  gap: 6px;
+  padding: 8px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
 .klavye-satir {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .klavye-tus {
-  height: 56px;
-  min-width: 34px;
-  padding: 0 10px;
-  border-radius: 10px;
+  height: 52px;
+  min-width: 28px;
+  flex: 1;
+  max-width: 42px;
+  padding: 0 4px;
+  border-radius: 8px;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   background: var(--bg-secondary);
@@ -365,7 +367,7 @@ body {
 
 .klavye-tus:hover {
   background: var(--bg-tertiary);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .klavye-tus:active {
@@ -373,8 +375,10 @@ body {
 }
 
 .klavye-tus.ozel {
-  min-width: 70px;
-  font-size: 20px;
+  min-width: 50px;
+  max-width: 60px;
+  flex: 1.5;
+  font-size: 18px;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
   border-color: transparent;
   color: white;
@@ -638,15 +642,24 @@ body {
   }
   
   .klavye-tus {
-    height: 50px;
-    min-width: 28px;
+    height: 46px;
+    min-width: 24px;
     font-size: 13px;
-    border-radius: 8px;
+    border-radius: 6px;
   }
   
   .klavye-tus.ozel {
-    min-width: 58px;
-    font-size: 18px;
+    min-width: 44px;
+    font-size: 16px;
+  }
+  
+  .klavye-satir {
+    gap: 3px;
+  }
+  
+  .klavye {
+    gap: 5px;
+    padding: 6px;
   }
   
   .logo {
@@ -683,23 +696,46 @@ body {
 
 @media (max-width: 360px) {
   .hucre {
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
+    width: 42px;
+    height: 42px;
+    font-size: 18px;
   }
   
   .satir {
-    gap: 6px;
+    gap: 5px;
   }
   
   .klavye-tus {
-    height: 46px;
-    min-width: 24px;
-    font-size: 12px;
+    height: 42px;
+    min-width: 20px;
+    font-size: 11px;
+  }
+  
+  .klavye-tus.ozel {
+    min-width: 38px;
+    font-size: 14px;
   }
   
   .klavye-satir {
+    gap: 2px;
+  }
+  
+  .klavye {
     gap: 4px;
+    padding: 4px;
+  }
+  
+  .top-menu {
+    gap: 6px;
+  }
+  
+  .menu-item {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  
+  .menu-item .emoji {
+    font-size: 14px;
   }
 }
 
@@ -709,31 +745,47 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 20px;
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .word-meaning h4 {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
 }
 
 .word-meaning p {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
   color: var(--text-secondary);
 }
 
 .word-meaning .example {
-  font-style: italic;
   margin-top: 12px;
-  padding: 12px;
-  background: var(--bg-tertiary);
-  border-radius: 10px;
+  font-style: italic;
+  color: var(--text-muted);
+  padding-left: 12px;
   border-left: 3px solid var(--accent);
+}
+
+.word-meaning .tdk-link {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-secondary) 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.word-meaning .tdk-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }

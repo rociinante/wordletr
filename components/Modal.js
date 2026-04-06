@@ -197,84 +197,115 @@ export function SonucIcerigi({
   );
 }
 
-// Kelime Anlamı Bileşeni - Anthropic API ile
+// Basit Türkçe Sözlük
+const SOZLUK = {
+  // 4 harfli
+  'AŞIK': { anlam: 'Sevdalı, tutkun olan kişi.', ornek: 'O, ona deli gibi aşıktı.' },
+  'KALE': { anlam: 'Savunma amaçlı yapılmış büyük yapı.', ornek: 'Kale surları çok sağlamdı.' },
+  'MASA': { anlam: 'Üzerinde yemek yenen veya çalışılan mobilya.', ornek: 'Masanın üzerine kitaplarını koydu.' },
+  'OKUL': { anlam: 'Eğitim ve öğretim yapılan kurum.', ornek: 'Çocuklar okula gitti.' },
+  'PARA': { anlam: 'Alışverişte kullanılan değişim aracı.', ornek: 'Cebinde hiç parası kalmamıştı.' },
+  'GECE': { anlam: 'Güneşin battığı ve karanlığın çöktüğü zaman dilimi.', ornek: 'Gece yıldızlar parlıyordu.' },
+  'HAVA': { anlam: 'Dünyayı saran gaz tabakası, atmosfer.', ornek: 'Bugün hava çok güzeldi.' },
+  'OYUN': { anlam: 'Eğlenmek için yapılan etkinlik.', ornek: 'Çocuklar bahçede oyun oynadı.' },
+  'ZEKA': { anlam: 'Anlama, öğrenme ve düşünme yeteneği.', ornek: 'Onun zekası herkesi şaşırtıyordu.' },
+  'UMUT': { anlam: 'İyi şeylerin olacağına dair beklenti.', ornek: 'Umudunu hiç kaybetmedi.' },
+  
+  // 5 harfli
+  'ADRES': { anlam: 'Bir yerin bulunduğu konum bilgisi.', ornek: 'Adresini not aldım.' },
+  'AKŞAM': { anlam: 'Güneşin batmaya başladığı zaman.', ornek: 'Akşam yemeği için buluştular.' },
+  'ALTIN': { anlam: 'Değerli sarı renkli bir maden.', ornek: 'Altın fiyatları yükseldi.' },
+  'BAHÇE': { anlam: 'Bitki yetiştirilen açık alan.', ornek: 'Bahçedeki çiçekler açmıştı.' },
+  'BALIK': { anlam: 'Suda yaşayan omurgalı hayvan.', ornek: 'Denizde çok balık vardı.' },
+  'BULUT': { anlam: 'Gökyüzündeki su buharı kümesi.', ornek: 'Bulutlar yağmur getiriyordu.' },
+  'CADDE': { anlam: 'Geniş ve ana yol.', ornek: 'Cadde trafiğe kapatıldı.' },
+  'ÇİÇEK': { anlam: 'Bitkilerin renkli ve güzel kokan kısmı.', ornek: 'Ona güzel çiçekler aldı.' },
+  'DENİZ': { anlam: 'Tuzlu su kütlesi, okyanus.', ornek: 'Denizde yüzmeyi seviyorum.' },
+  'DÜNYA': { anlam: 'Üzerinde yaşadığımız gezegen.', ornek: 'Dünya güneşin etrafında döner.' },
+  'GÜNEŞ': { anlam: 'Güneş sisteminin merkez yıldızı.', ornek: 'Güneş bugün çok parlak.' },
+  'HAYAT': { anlam: 'Canlı olma durumu, yaşam.', ornek: 'Hayat bazen zor olabiliyor.' },
+  'İNSAN': { anlam: 'Akıl ve düşünce sahibi canlı.', ornek: 'İnsan sosyal bir varlıktır.' },
+  'KİTAP': { anlam: 'Yazılı sayfaların bir araya getirilmiş hali.', ornek: 'Bu kitap çok güzeldi.' },
+  'MÜZIK': { anlam: 'Seslerin ahenkli bir şekilde düzenlenmesi sanatı.', ornek: 'Müzik ruhun gıdasıdır.' },
+  'SABAH': { anlam: 'Günün başlangıç vakti.', ornek: 'Sabah erkenden kalktı.' },
+  'SEVGI': { anlam: 'Birine duyulan derin bağlılık hissi.', ornek: 'Sevgi her şeyin başıdır.' },
+  'YEMEK': { anlam: 'Yenilen besin, gıda.', ornek: 'Annem güzel yemek yapar.' },
+  'ZAMAN': { anlam: 'Olayların geçtiği süre.', ornek: 'Zaman çok hızlı geçiyor.' },
+  
+  // 6 harfli
+  'BAŞARI': { anlam: 'Bir işte istenen sonuca ulaşma.', ornek: 'Başarı çok çalışmakla gelir.' },
+  'DİKKAT': { anlam: 'Bir şeye odaklanma, özen gösterme.', ornek: 'Dikkatini derse ver.' },
+  'EFSANE': { anlam: 'Kuşaktan kuşağa aktarılan olağanüstü hikaye.', ornek: 'Bu efsane yüzyıllardır anlatılır.' },
+  'EĞİTİM': { anlam: 'Bilgi ve beceri kazandırma süreci.', ornek: 'Eğitim çok önemlidir.' },
+  'GÜÇLÜK': { anlam: 'Zorluk, engel.', ornek: 'Her güçlüğün üstesinden geldi.' },
+  'HİKAYE': { anlam: 'Anlatılan olay, öykü.', ornek: 'Çocuklara hikaye anlattı.' },
+  'KELIME': { anlam: 'Anlamlı en küçük dil birimi, sözcük.', ornek: 'Bu kelimeyi bilmiyorum.' },
+  'MEYDAN': { anlam: 'Geniş açık alan, alan.', ornek: 'Meydanda konser vardı.' },
+  'SAĞLIK': { anlam: 'Bedensel ve ruhsal iyilik hali.', ornek: 'Sağlık en büyük nimettir.' },
+  'TOPLUM': { anlam: 'Bir arada yaşayan insan topluluğu.', ornek: 'Toplum kuralları önemlidir.' },
+  
+  // 7 harfli
+  'BAŞLANGI': { anlam: 'Bir şeyin ilk anı, başlama noktası.', ornek: 'Her son, yeni bir başlangıçtır.' },
+  'GÜVENLIK': { anlam: 'Tehlikeden uzak olma durumu.', ornek: 'Güvenlik önlemleri alındı.' },
+  'ILETIŞIM': { anlam: 'Bilgi ve duygu alışverişi.', ornek: 'İletişim çok önemlidir.' },
+  'INTERNET': { anlam: 'Dünya çapında bilgisayar ağı.', ornek: 'İnternet hayatımızı değiştirdi.' },
+  'KARAKTER': { anlam: 'Kişinin ayırt edici özellikleri.', ornek: 'Karakteri çok güçlüydü.' },
+  'LİDERLIK': { anlam: 'Bir grubu yönetme yeteneği.', ornek: 'Liderlik kolay değildir.' },
+  'MÜKEMMEL': { anlam: 'Kusursuz, eksiksiz.', ornek: 'Bu iş mükemmel olmuş.' },
+  'POLITIKA': { anlam: 'Devlet yönetimi ile ilgili faaliyetler.', ornek: 'Politika karmaşık bir alandır.' },
+  'STRATEJI': { anlam: 'Hedefe ulaşmak için izlenen yol.', ornek: 'İyi bir strateji gerekiyor.' },
+  'YÖNETICI': { anlam: 'Bir işi veya kurumu yöneten kişi.', ornek: 'Yönetici toplantıya katıldı.' },
+  
+  // Ek kelimeler
+  'HÜNER': { anlam: 'Ustalık, beceri, maharet.', ornek: 'Bu işi yapmak büyük hüner ister.' },
+  'GÜZEL': { anlam: 'Estetik açıdan hoşa giden, çekici.', ornek: 'Ne güzel bir gün!' },
+  'MUTLU': { anlam: 'Sevinçli, neşeli, keyifli.', ornek: 'Bugün çok mutluyum.' },
+  'SERIN': { anlam: 'Hafif soğuk, ferah.', ornek: 'Hava serin ve güzeldi.' },
+  'HIZLI': { anlam: 'Süratli, çabuk hareket eden.', ornek: 'Çok hızlı koşuyor.' },
+  'BILGI': { anlam: 'Öğrenme sonucu edinilen her şey.', ornek: 'Bilgi güçtür.' },
+  'DEĞER': { anlam: 'Bir şeyin önemi, kıymeti.', ornek: 'Sağlığın değerini bil.' },
+  'GIRIŞ': { anlam: 'Bir yere veya konuya başlama.', ornek: 'Giriş kapısı kapalıydı.' },
+  'ÇIKIŞ': { anlam: 'Dışarıya çıkma, ayrılma.', ornek: 'Çıkış nerede?' },
+  'TEMEL': { anlam: 'Ana, esas, dayanak.', ornek: 'Temel bilgileri öğren.' }
+};
+
+// Kelime Anlamı Bileşeni - Yerleşik sözlük ile
 function KelimeAnlami({ kelime }) {
   const [anlam, setAnlam] = useState(null);
-  const [yukleniyor, setYukleniyor] = useState(true);
 
   useEffect(() => {
     if (!kelime) return;
 
-    const anlamGetir = async () => {
-      setYukleniyor(true);
+    // Önce cache'e bak
+    const cacheKey = `wordletr_anlam_${kelime}`;
+    const cached = localStorage.getItem(cacheKey);
+    
+    if (cached) {
+      setAnlam(JSON.parse(cached));
+      return;
+    }
 
-      try {
-        // Önce localStorage'dan kontrol et (cache)
-        const cacheKey = `wordletr_anlam_${kelime}`;
-        const cached = localStorage.getItem(cacheKey);
-        
-        if (cached) {
-          setAnlam(JSON.parse(cached));
-          setYukleniyor(false);
-          return;
-        }
-
-        // Anthropic API'den getir
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 150,
-            messages: [{
-              role: 'user',
-              content: `"${kelime}" kelimesinin Türkçe anlamını 1 cümleyle açıkla ve kısa bir örnek cümle ver. Sadece JSON döndür, başka bir şey yazma: {"anlam": "...", "ornek": "..."}`
-            }]
-          })
-        });
-
-        if (!response.ok) throw new Error('API hatası');
-
-        const data = await response.json();
-        const content = data.content?.[0]?.text || '';
-        
-        // JSON parse et
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const anlamData = JSON.parse(jsonMatch[0]);
-          const sonuc = {
-            kelime,
-            anlam: anlamData.anlam,
-            ornek: anlamData.ornek
-          };
-          setAnlam(sonuc);
-          localStorage.setItem(cacheKey, JSON.stringify(sonuc));
-        }
-      } catch (e) {
-        console.warn('Kelime anlamı yüklenemedi:', e);
-        // Fallback - basit mesaj
-        setAnlam({
-          kelime,
-          anlam: 'Bu kelimenin anlamını öğrenmek için sözlüğe bakabilirsin.',
-          ornek: null
-        });
-      } finally {
-        setYukleniyor(false);
-      }
-    };
-
-    anlamGetir();
+    // Sözlükte ara
+    const sozlukAnlam = SOZLUK[kelime.toUpperCase()];
+    
+    if (sozlukAnlam) {
+      const sonuc = {
+        kelime,
+        anlam: sozlukAnlam.anlam,
+        ornek: sozlukAnlam.ornek
+      };
+      setAnlam(sonuc);
+      localStorage.setItem(cacheKey, JSON.stringify(sonuc));
+    } else {
+      // Sözlükte yoksa TDK'ya yönlendir
+      setAnlam({
+        kelime,
+        anlam: `Türk Dil Kurumu sözlüğünden arayabilirsin.`,
+        ornek: null,
+        tdkLink: `https://sozluk.gov.tr/?kelime=${encodeURIComponent(kelime.toLowerCase())}`
+      });
+    }
   }, [kelime]);
-
-  if (yukleniyor) {
-    return (
-      <div className="word-meaning animate-pulse">
-        <div className="h-6 bg-white/10 rounded w-1/3 mb-3"></div>
-        <div className="h-4 bg-white/10 rounded w-full mb-2"></div>
-        <div className="h-4 bg-white/10 rounded w-2/3"></div>
-      </div>
-    );
-  }
 
   if (!anlam) return null;
 
@@ -284,6 +315,16 @@ function KelimeAnlami({ kelime }) {
       <p>{anlam.anlam}</p>
       {anlam.ornek && (
         <p className="example">"{anlam.ornek}"</p>
+      )}
+      {anlam.tdkLink && (
+        <a 
+          href={anlam.tdkLink} 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="tdk-link"
+        >
+          📖 TDK Sözlük'te Ara
+        </a>
       )}
     </div>
   );
