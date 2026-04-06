@@ -197,18 +197,16 @@ export function SonucIcerigi({
   );
 }
 
-// Kelime Anlamı Bileşeni
+// Kelime Anlamı Bileşeni - Anthropic API ile
 function KelimeAnlami({ kelime }) {
   const [anlam, setAnlam] = useState(null);
   const [yukleniyor, setYukleniyor] = useState(true);
-  const [hata, setHata] = useState(false);
 
   useEffect(() => {
     if (!kelime) return;
 
     const anlamGetir = async () => {
       setYukleniyor(true);
-      setHata(false);
 
       try {
         // Önce localStorage'dan kontrol et (cache)
@@ -221,27 +219,45 @@ function KelimeAnlami({ kelime }) {
           return;
         }
 
-        // API'den getir
-        const response = await fetch('https://wordletr.com/api/anlam.php', {
+        // Anthropic API'den getir
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kelime })
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 150,
+            messages: [{
+              role: 'user',
+              content: `"${kelime}" kelimesinin Türkçe anlamını 1 cümleyle açıkla ve kısa bir örnek cümle ver. Sadece JSON döndür, başka bir şey yazma: {"anlam": "...", "ornek": "..."}`
+            }]
+          })
         });
 
         if (!response.ok) throw new Error('API hatası');
 
         const data = await response.json();
+        const content = data.content?.[0]?.text || '';
         
-        if (data.basarili) {
-          setAnlam(data);
-          // Cache'e kaydet (7 gün)
-          localStorage.setItem(cacheKey, JSON.stringify(data));
-        } else {
-          throw new Error('Anlam bulunamadı');
+        // JSON parse et
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const anlamData = JSON.parse(jsonMatch[0]);
+          const sonuc = {
+            kelime,
+            anlam: anlamData.anlam,
+            ornek: anlamData.ornek
+          };
+          setAnlam(sonuc);
+          localStorage.setItem(cacheKey, JSON.stringify(sonuc));
         }
       } catch (e) {
         console.warn('Kelime anlamı yüklenemedi:', e);
-        setHata(true);
+        // Fallback - basit mesaj
+        setAnlam({
+          kelime,
+          anlam: 'Bu kelimenin anlamını öğrenmek için sözlüğe bakabilirsin.',
+          ornek: null
+        });
       } finally {
         setYukleniyor(false);
       }
@@ -260,9 +276,7 @@ function KelimeAnlami({ kelime }) {
     );
   }
 
-  if (hata || !anlam) {
-    return null; // Hata durumunda sessizce geç
-  }
+  if (!anlam) return null;
 
   return (
     <div className="word-meaning">
