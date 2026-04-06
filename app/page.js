@@ -95,6 +95,7 @@ export default function Home() {
   const [survivalAktif, setSurvivalAktif] = useState(false);
   const [survivalBaslangic, setSurvivalBaslangic] = useState(0);
   const timerRef = useRef(null);
+  const mobilInputRef = useRef(null);
 
   // Merdiven modu
   const [merdivenSeviye, setMerdivenSeviye] = useState(4);
@@ -548,6 +549,36 @@ export default function Home() {
     }
   };
 
+  // Tahtaya tıklama - mobil klavye aç
+  const handleTahtaTikla = () => {
+    if (oyunBitti) return;
+    if (mobilInputRef.current) {
+      mobilInputRef.current.focus();
+    }
+  };
+
+  // Mobil input değişikliği
+  const handleMobilInput = (e) => {
+    if (oyunBitti) return;
+    const value = e.target.value;
+    if (!value) return;
+    
+    // Son karakteri al
+    const sonKarakter = value.slice(-1);
+    
+    // Geçerli harf mi kontrol et
+    if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(sonKarakter)) {
+      let harf = sonKarakter.toUpperCase();
+      // Türkçe i/İ dönüşümü
+      if (sonKarakter === 'i') harf = 'İ';
+      if (sonKarakter === 'ı') harf = 'I';
+      if (harfEkleRef.current) harfEkleRef.current(harf);
+    }
+    
+    // Input'u temizle
+    e.target.value = '';
+  };
+
   // Kategori değişimi
   const handleKategoriDegis = (yeniKategori) => {
     setKategori(yeniKategori);
@@ -778,8 +809,31 @@ export default function Home() {
           </div>
         )}
 
+        {/* Gizli mobil input */}
+        <input
+          ref={mobilInputRef}
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="characters"
+          spellCheck="false"
+          className="mobile-input"
+          value=""
+          onChange={handleMobilInput}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (tahminGonderRef.current) tahminGonderRef.current();
+            }
+          }}
+        />
+
         {/* Oyun tahtası */}
-        <div className="flex-1 flex items-center justify-center py-4">
+        <div 
+          className="flex-1 flex items-center justify-center py-2 cursor-pointer"
+          onClick={handleTahtaTikla}
+        >
           <Tahta
             tahminler={tahminler}
             sonuclar={mod === 'kor' ? sonuclar.map(() => Array(hedefKelime?.length || 5).fill('bos')) : sonuclar}
