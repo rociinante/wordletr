@@ -1,29 +1,41 @@
-# Wordletr 🎯
+# Wordletr 🎮
 
-Türkçe günlük kelime tahmin oyunu.
+Türkçe Wordle deneyimi! 6 farklı modda oyna, rozetler kazan, arkadaşlarına meydan oku.
 
-## Özellikler
+## ✨ Özellikler
 
-- 🎮 Günlük kelime tahmini
-- 📊 4-7 harf arası kelime uzunluğu seçimi
-- 🌙 Karanlık/Aydınlık tema
-- 📈 Kişisel istatistikler
-- 📤 Sonuç paylaşımı
-- 📱 Mobil uyumlu
+### Oyun Modları
+- ♾️ **Sınırsız** — İstediğin kadar oyna
+- 📅 **Günlük** — Her gün yeni kelime, tek hak
+- 🔥 **Zor Mod** — Bulunan harfleri kullanmak zorunlu
+- ⏱️ **Time Attack** — 5 dakikada en fazla kelime
+- 🪜 **Merdiven** — 4→5→6→7 harf, yanılırsan başa dön
+- 💀 **Survival** — 60 saniye, doğru harfte +süre
+- 🙈 **Kör Mod** — Renkler yok, sadece sayılar
 
-## Kurulum
+### Diğer Özellikler
+- 🏆 Global liderlik tablosu
+- 🏅 25+ rozet sistemi
+- 🎯 Meydan okuma linki
+- 🔊 Ses efektleri
+- 🎨 6 tema rengi
+- 🌙 Karanlık/Aydınlık mod
+- 📱 PWA desteği
+
+## 🚀 Kurulum
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Teknolojiler
+## 📁 Hosting Kurulumu
 
-- Next.js 14
-- Tailwind CSS
-- localStorage
+1. `api/liderlik.php` → `/public_html/api/liderlik.php`
+2. `lib/depolama.js` satır 4'ü güncelle:
+   ```javascript
+   const API_URL = 'https://senin-domain.com/api/liderlik.php';
+   ```
+3. PWA ikonları ekle: `icon-192.png`, `icon-512.png`
 
-## Lisans
-
-MIT
+Made with 💜

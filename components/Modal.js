@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { sesAyariGetir, sesAyariKaydet } from '../lib/ses';
+import { temaRengiGetir, temaRengiDegistir, TEMA_RENKLERI } from '../lib/depolama';
+import { gunlukSonucGetir, gunlukIstatistikGetir } from '../lib/kelimeSecici';
 
 export default function Modal({ 
   acik, 
@@ -47,7 +50,8 @@ export function SonucIcerigi({
   oyunBitti = true,
   mod = 'sinirsiz',
   timeAttackSkor = 0,
-  merdivenSeviye = 4
+  merdivenSeviye = 4,
+  yeniRozetler = []
 }) {
   const [kopyalandi, setKopyalandi] = useState(false);
 
@@ -114,6 +118,21 @@ export function SonucIcerigi({
         </div>
       )}
 
+      {/* Yeni kazanılan rozetler */}
+      {yeniRozetler.length > 0 && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/30">
+          <p className="text-sm font-semibold mb-3 text-center">🏅 Yeni Rozetler!</p>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {yeniRozetler.map((rozet, i) => (
+              <div key={i} className="text-center">
+                <span className="text-3xl">{rozet.emoji}</span>
+                <p className="text-xs mt-1 font-medium">{rozet.isim}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-4 gap-2">
         <div className="stat-card">
           <div className="stat-number">{istatistik.oynanan}</div>
@@ -150,6 +169,11 @@ export function SonucIcerigi({
         ))}
       </div>
 
+      {/* Kelime Anlamı */}
+      {oyunBitti && hedefKelime && (
+        <KelimeAnlami kelime={hedefKelime} />
+      )}
+
       <div className="space-y-3 pt-2">
         {oyunBitti && (
           <button 
@@ -169,6 +193,84 @@ export function SonucIcerigi({
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+// Kelime Anlamı Bileşeni
+function KelimeAnlami({ kelime }) {
+  const [anlam, setAnlam] = useState(null);
+  const [yukleniyor, setYukleniyor] = useState(true);
+  const [hata, setHata] = useState(false);
+
+  useEffect(() => {
+    if (!kelime) return;
+
+    const anlamGetir = async () => {
+      setYukleniyor(true);
+      setHata(false);
+
+      try {
+        // Önce localStorage'dan kontrol et (cache)
+        const cacheKey = `wordletr_anlam_${kelime}`;
+        const cached = localStorage.getItem(cacheKey);
+        
+        if (cached) {
+          setAnlam(JSON.parse(cached));
+          setYukleniyor(false);
+          return;
+        }
+
+        // API'den getir
+        const response = await fetch('https://wordletr.com/api/anlam.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kelime })
+        });
+
+        if (!response.ok) throw new Error('API hatası');
+
+        const data = await response.json();
+        
+        if (data.basarili) {
+          setAnlam(data);
+          // Cache'e kaydet (7 gün)
+          localStorage.setItem(cacheKey, JSON.stringify(data));
+        } else {
+          throw new Error('Anlam bulunamadı');
+        }
+      } catch (e) {
+        console.warn('Kelime anlamı yüklenemedi:', e);
+        setHata(true);
+      } finally {
+        setYukleniyor(false);
+      }
+    };
+
+    anlamGetir();
+  }, [kelime]);
+
+  if (yukleniyor) {
+    return (
+      <div className="word-meaning animate-pulse">
+        <div className="h-6 bg-white/10 rounded w-1/3 mb-3"></div>
+        <div className="h-4 bg-white/10 rounded w-full mb-2"></div>
+        <div className="h-4 bg-white/10 rounded w-2/3"></div>
+      </div>
+    );
+  }
+
+  if (hata || !anlam) {
+    return null; // Hata durumunda sessizce geç
+  }
+
+  return (
+    <div className="word-meaning">
+      <h4>{kelime}</h4>
+      <p>{anlam.anlam}</p>
+      {anlam.ornek && (
+        <p className="example">"{anlam.ornek}"</p>
+      )}
     </div>
   );
 }
@@ -257,7 +359,7 @@ export function LiderlikIcerigi({ liderlik, mevcutKullaniciId, kullaniciAdi, onA
         )}
 
         <p className="text-xs text-center opacity-40 mt-4">
-          ℹ️ Liderlik tablosu bu cihazda saklanır
+          🌐 Global liderlik tablosu
         </p>
       </div>
     </div>
@@ -345,34 +447,44 @@ export function KategoriSeciciIcerigi({ kategoriler, mevcutKategori, onKategoriS
 }
 
 // Mod Seçici İçeriği
-export function ModSeciciIcerigi({ modlar, mevcutMod, onModSec }) {
+export function ModSeciciIcerigi({ modlar, mevcutMod, onModSec, gunlukOynandi = false }) {
   return (
     <div className="space-y-3">
       <p className="text-xs uppercase tracking-wider opacity-60 mb-4">Bir mod seç</p>
       
       <div className="grid gap-3">
-        {Object.entries(modlar).map(([key, mod]) => (
-          <button
-            key={key}
-            onClick={() => onModSec(key)}
-            className={`p-4 rounded-xl text-left transition-all ${
-              mevcutMod === key 
-                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
-                : 'hover:scale-102'
-            }`}
-            style={{ 
-              background: mevcutMod !== key ? 'var(--bg-tertiary)' : undefined,
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{mod.emoji}</span>
-              <div>
-                <p className="font-bold">{mod.isim}</p>
-                <p className="text-xs opacity-70">{mod.aciklama}</p>
+        {Object.entries(modlar).map(([key, mod]) => {
+          const gunlukTamamlandi = key === 'gunluk' && gunlukOynandi;
+          
+          return (
+            <button
+              key={key}
+              onClick={() => onModSec(key)}
+              disabled={gunlukTamamlandi}
+              className={`p-4 rounded-xl text-left transition-all ${
+                mevcutMod === key 
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' 
+                  : gunlukTamamlandi
+                    ? 'opacity-50 cursor-not-allowed'
+                    : 'hover:scale-102'
+              }`}
+              style={{ 
+                background: mevcutMod !== key ? 'var(--bg-tertiary)' : undefined,
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{gunlukTamamlandi ? '✅' : mod.emoji}</span>
+                <div>
+                  <p className="font-bold">
+                    {mod.isim}
+                    {gunlukTamamlandi && <span className="text-xs ml-2 opacity-70">(Bugün oynandı)</span>}
+                  </p>
+                  <p className="text-xs opacity-70">{mod.aciklama}</p>
+                </div>
               </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -461,6 +573,197 @@ export function MeydanOkumaIcerigi({ onLinkOlustur }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// Rozetler içeriği
+export function RozetlerIcerigi({ rozetler }) {
+  const kazanilanlar = rozetler.filter(r => r.kazanildi);
+  const kazanilmayanlar = rozetler.filter(r => !r.kazanildi && !r.gizli);
+  const gizliKazanilanlar = rozetler.filter(r => r.kazanildi && r.gizli);
+  
+  return (
+    <div className="space-y-6">
+      {/* Progress */}
+      <div className="text-center">
+        <div className="text-4xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>
+          <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            {kazanilanlar.length}
+          </span>
+          <span className="opacity-40 text-2xl"> / {rozetler.length}</span>
+        </div>
+        <p className="text-sm opacity-60 mt-1">rozet kazanıldı</p>
+        
+        {/* Progress bar */}
+        <div className="mt-3 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-tertiary)' }}>
+          <div 
+            className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+            style={{ width: `${(kazanilanlar.length / rozetler.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Kazanılan rozetler */}
+      {kazanilanlar.length > 0 && (
+        <div>
+          <p className="text-xs uppercase tracking-wider opacity-60 mb-3">✨ Kazanılan</p>
+          <div className="grid grid-cols-3 gap-3">
+            {kazanilanlar.map(rozet => (
+              <div 
+                key={rozet.id}
+                className="p-3 rounded-xl text-center transition-transform hover:scale-105"
+                style={{ background: 'var(--bg-tertiary)' }}
+              >
+                <span className="text-3xl">{rozet.emoji}</span>
+                <p className="text-xs font-semibold mt-2 truncate">{rozet.isim}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Kazanılmayan rozetler */}
+      {kazanilmayanlar.length > 0 && (
+        <div>
+          <p className="text-xs uppercase tracking-wider opacity-60 mb-3">🔒 Kilitli</p>
+          <div className="grid grid-cols-3 gap-3">
+            {kazanilmayanlar.map(rozet => (
+              <div 
+                key={rozet.id}
+                className="p-3 rounded-xl text-center opacity-40"
+                style={{ background: 'var(--bg-secondary)' }}
+              >
+                <span className="text-3xl grayscale">🔒</span>
+                <p className="text-xs font-semibold mt-2 truncate">{rozet.isim}</p>
+                <p className="text-[10px] opacity-60 mt-1">{rozet.aciklama}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Gizli rozetler ipucu */}
+      <p className="text-xs text-center opacity-40">
+        🔮 {rozetler.filter(r => r.gizli && !r.kazanildi).length} gizli rozet keşfedilmeyi bekliyor
+      </p>
+    </div>
+  );
+}
+
+// Ayarlar içeriği
+export function AyarlarIcerigi() {
+  const [ses, setSes] = useState(true);
+  const [renk, setRenk] = useState('varsayilan');
+
+  useEffect(() => {
+    setSes(sesAyariGetir());
+    setRenk(temaRengiGetir());
+  }, []);
+
+  const handleSesToggle = () => {
+    const yeni = !ses;
+    setSes(yeni);
+    sesAyariKaydet(yeni);
+  };
+
+  const handleRenkDegistir = (yeniRenk) => {
+    setRenk(yeniRenk);
+    temaRengiDegistir(yeniRenk);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Ses */}
+      <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: 'var(--bg-tertiary)' }}>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{ses ? '🔊' : '🔇'}</span>
+          <div>
+            <p className="font-semibold">Ses Efektleri</p>
+            <p className="text-xs opacity-60">Tuş ve bildirim sesleri</p>
+          </div>
+        </div>
+        <button 
+          onClick={handleSesToggle}
+          className={`w-14 h-8 rounded-full transition-all ${ses ? 'bg-green-500' : 'bg-gray-500'}`}
+        >
+          <div className={`w-6 h-6 bg-white rounded-full transition-transform ${ses ? 'translate-x-7' : 'translate-x-1'}`} />
+        </button>
+      </div>
+
+      {/* Tema Rengi */}
+      <div>
+        <p className="text-sm font-semibold mb-3">🎨 Tema Rengi</p>
+        <div className="grid grid-cols-3 gap-2">
+          {Object.entries(TEMA_RENKLERI).map(([key, value]) => (
+            <button
+              key={key}
+              onClick={() => handleRenkDegistir(key)}
+              className={`p-3 rounded-xl transition-all ${renk === key ? 'ring-2 ring-white scale-105' : 'opacity-70 hover:opacity-100'}`}
+              style={{ background: 'var(--bg-tertiary)' }}
+            >
+              <span className="text-2xl">{value.emoji}</span>
+              <p className="text-xs mt-1">{value.isim}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Versiyon */}
+      <p className="text-xs text-center opacity-40">
+        Wordletr v5.0 • Made with 💜
+      </p>
+    </div>
+  );
+}
+
+// Günlük Challenge içeriği
+export function GunlukIcerigi() {
+  const sonuc = gunlukSonucGetir();
+  const ist = gunlukIstatistikGetir();
+
+  if (!sonuc) {
+    return (
+      <div className="text-center py-8">
+        <span className="text-6xl">📅</span>
+        <p className="mt-4 font-semibold">Bugünkü challenge henüz oynanmadı!</p>
+        <p className="text-sm opacity-60 mt-2">Mod seçiciden "Günlük" modunu seç ve oyna.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Bugünün sonucu */}
+      <div className="text-center p-6 rounded-2xl" style={{ background: 'var(--bg-tertiary)' }}>
+        <span className="text-5xl">{sonuc.kazandi ? '🎉' : '😔'}</span>
+        <p className="mt-3 font-bold text-xl">
+          {sonuc.kazandi ? `${sonuc.tahminSayisi}/6 Tahminde Bildin!` : 'Yarın Tekrar Dene!'}
+        </p>
+        <p className="text-sm opacity-60 mt-2">
+          Kelime: <strong>{sonuc.kelime}</strong>
+        </p>
+      </div>
+
+      {/* Günlük istatistikler */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="stat-card">
+          <p className="stat-number">{ist.oynanan}</p>
+          <p className="stat-label">Oynanan</p>
+        </div>
+        <div className="stat-card">
+          <p className="stat-number">{ist.kazanilan}</p>
+          <p className="stat-label">Kazanılan</p>
+        </div>
+        <div className="stat-card">
+          <p className="stat-number">{ist.seri}</p>
+          <p className="stat-label">Günlük Seri</p>
+        </div>
+      </div>
+
+      <p className="text-xs text-center opacity-40">
+        🔄 Yeni kelime her gece 00:00'da
+      </p>
     </div>
   );
 }

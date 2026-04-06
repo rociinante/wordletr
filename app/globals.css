@@ -8,7 +8,7 @@
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Nunito', sans-serif;
   
-  /* Dark tema (varsayılan) */
+  /* Dark tema (tek tema) */
   --bg-primary: #0a0a12;
   --bg-secondary: rgba(255, 255, 255, 0.06);
   --bg-tertiary: rgba(255, 255, 255, 0.1);
@@ -25,15 +25,36 @@
   --cell-absent: #374151;
 }
 
-.light {
-  --bg-primary: #f1f5f9;
-  --bg-secondary: rgba(0, 0, 0, 0.04);
-  --bg-tertiary: rgba(0, 0, 0, 0.08);
-  --text-primary: #0f172a;
-  --text-secondary: rgba(0, 0, 0, 0.6);
-  --border-color: rgba(0, 0, 0, 0.1);
-  --cell-empty: rgba(0, 0, 0, 0.06);
-  --cell-absent: #9ca3af;
+/* ============ TEMA SEÇENEKLERİ ============ */
+
+/* Okyanus (Mavi) */
+.tema-okyanus {
+  --accent: #0ea5e9;
+  --accent-secondary: #06b6d4;
+}
+
+/* Orman (Yeşil) */
+.tema-orman {
+  --accent: #10b981;
+  --accent-secondary: #34d399;
+}
+
+/* Gün Batımı (Turuncu) */
+.tema-gunbatimi {
+  --accent: #f97316;
+  --accent-secondary: #fb923c;
+}
+
+/* Gül (Pembe) */
+.tema-gul {
+  --accent: #ec4899;
+  --accent-secondary: #f472b6;
+}
+
+/* Altın (Sarı) */
+.tema-altin {
+  --accent: #eab308;
+  --accent-secondary: #facc15;
 }
 
 * {

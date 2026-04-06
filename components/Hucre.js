@@ -8,10 +8,8 @@ export default function Hucre({ harf, durum, index, animasyonGecikme = 0 }) {
 
   useEffect(() => {
     if (durum && durum !== 'bos') {
-      // Animasyon gecikmesi
       const timer = setTimeout(() => {
         setAnimasyonBasladi(true);
-        // Animasyonun ortasında rengi değiştir
         setTimeout(() => {
           setGosterilecekDurum(durum);
         }, 200);
@@ -35,6 +33,33 @@ export default function Hucre({ harf, durum, index, animasyonGecikme = 0 }) {
     classes.push(gosterilecekDurum);
   }
 
+  // I ve İ harflerini özel göster
+  const harfGoster = () => {
+    if (!harf) return '';
+    
+    // I harfi (noktasız) - altında küçük çizgi
+    if (harf === 'I') {
+      return (
+        <span className="flex flex-col items-center leading-none">
+          <span className="text-[26px]">I</span>
+          <span className="text-[8px] -mt-1 opacity-70">▬</span>
+        </span>
+      );
+    }
+    
+    // İ harfi (noktalı) - üstünde belirgin nokta
+    if (harf === 'İ') {
+      return (
+        <span className="flex flex-col items-center leading-none">
+          <span className="text-[10px] -mb-1">●</span>
+          <span className="text-[26px]">I</span>
+        </span>
+      );
+    }
+    
+    return harf;
+  };
+
   return (
     <div 
       className={classes.join(' ')}
@@ -42,7 +67,7 @@ export default function Hucre({ harf, durum, index, animasyonGecikme = 0 }) {
         animationDelay: animasyonBasladi ? `${animasyonGecikme}ms` : '0ms'
       }}
     >
-      {harf || ''}
+      {harfGoster()}
     </div>
   );
 }

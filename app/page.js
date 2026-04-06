@@ -4,9 +4,33 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../components/Header';
 import Tahta from '../components/Tahta';
 import Klavye from '../components/Klavye';
-import Modal, { SonucIcerigi, NasilOynanirIcerigi, LiderlikIcerigi, KategoriSeciciIcerigi, ModSeciciIcerigi, MeydanOkumaIcerigi } from '../components/Modal';
-import { kontrolEt, klavyeGuncelle, paylasimMetni, zorModKontrol, korModSonuc } from '../lib/oyunMotoru';
-import { rastgeleKelimeUzunluklu, kategorileriGetir, oyunSayisiGetir, oyunSayisiArtir, ipucuHakkiHesapla, ipucuOlustur, mevcutUzunluklar, kelimeSifrele, kelimeCoz } from '../lib/kelimeSecici';
+import Modal, { 
+  SonucIcerigi, 
+  NasilOynanirIcerigi, 
+  LiderlikIcerigi, 
+  KategoriSeciciIcerigi, 
+  ModSeciciIcerigi, 
+  MeydanOkumaIcerigi,
+  RozetlerIcerigi,
+  AyarlarIcerigi,
+  GunlukIcerigi
+} from '../components/Modal';
+import { kontrolEt, klavyeGuncelle, paylasimMetni, korModSonuc } from '../lib/oyunMotoru';
+import { 
+  rastgeleKelimeUzunluklu, 
+  kategorileriGetir, 
+  oyunSayisiGetir, 
+  oyunSayisiArtir, 
+  ipucuHakkiHesapla, 
+  ipucuOlustur, 
+  mevcutUzunluklar, 
+  kelimeSifrele, 
+  kelimeCoz,
+  gunlukKelimeGetir,
+  gunlukOynandiMi,
+  gunlukOynandi,
+  gunlukIstatistikGuncelle
+} from '../lib/kelimeSecici';
 import { 
   istatistikGetir, 
   kazandiGuncelle, 
@@ -14,14 +38,29 @@ import {
   kullaniciGetir,
   kullaniciAdiGuncelle,
   liderlikGetir,
-  liderlikGuncelle
+  liderlikGuncelle,
+  liderlikGetirAPI,
+  temaRengiBaslat
 } from '../lib/depolama';
+import { rozetKontrol, tumRozetler, kazanilanRozetSayisi, toplamRozetSayisi } from '../lib/rozetler';
+import { 
+  tusSesi, 
+  silSesi, 
+  enterSesi, 
+  hataSesi, 
+  kazanmaSesi, 
+  kaybetmeSesi, 
+  seviyeSesi, 
+  rozetSesi,
+  ipucuSesi,
+  countdownSesi,
+  sesAyariGetir
+} from '../lib/ses';
 
 // Modlar
 const MODLAR = {
   sinirsiz: { isim: 'Sınırsız', emoji: '♾️', aciklama: 'İstediğin kadar oyna' },
-  zor: { isim: 'Zor Mod', emoji: '🔥', aciklama: 'Bulunan harfleri kullanmak zorunlu' },
-  timeattack: { isim: 'Time Attack', emoji: '⏱️', aciklama: '5 dakikada en fazla kelime' },
+  gunluk: { isim: 'Günlük', emoji: '📅', aciklama: 'Her gün yeni kelime, tek hak' },
   merdiven: { isim: 'Merdiven', emoji: '🪜', aciklama: '4→5→6→7 harf, yanılırsan başa dön' },
   survival: { isim: 'Hayatta Kal', emoji: '💀', aciklama: '60 saniye, doğru harfte +süre' },
   kor: { isim: 'Kör Mod', emoji: '🙈', aciklama: 'Renkler yok, sadece sayılar' }
@@ -43,18 +82,18 @@ export default function Home() {
   const [hataMetni, setHataMetni] = useState('');
   const [oyunSayisi, setOyunSayisi] = useState(1);
 
-  // Kelime anlamı
-  const [kelimeAnlami, setKelimeAnlami] = useState(null);
-  const [anlamYukleniyor, setAnlamYukleniyor] = useState(false);
+  // Rozet bildirimi
+  const [yeniRozetler, setYeniRozetler] = useState([]);
+  const [rozetBildirimi, setRozetBildirimi] = useState(null);
 
   // Meydan okuma
   const [meydanOkumaModu, setMeydanOkumaModu] = useState(false);
-  const [meydanOkumaKelime, setMeydanOkumaKelime] = useState('');
 
   // Time Attack & Survival
   const [kalanSure, setKalanSure] = useState(0);
   const [timeAttackSkor, setTimeAttackSkor] = useState(0);
   const [survivalAktif, setSurvivalAktif] = useState(false);
+  const [survivalBaslangic, setSurvivalBaslangic] = useState(0);
   const timerRef = useRef(null);
 
   // Merdiven modu
@@ -78,6 +117,9 @@ export default function Home() {
   const [kategoriModalAcik, setKategoriModalAcik] = useState(false);
   const [modModalAcik, setModModalAcik] = useState(false);
   const [meydanOkumaModalAcik, setMeydanOkumaModalAcik] = useState(false);
+  const [rozetlerModalAcik, setRozetlerModalAcik] = useState(false);
+  const [ayarlarModalAcik, setAyarlarModalAcik] = useState(false);
+  const [gunlukModalAcik, setGunlukModalAcik] = useState(false);
   const [istatistik, setIstatistik] = useState(null);
   const [kategoriler, setKategoriler] = useState({});
   const [uzunluklar, setUzunluklar] = useState([5]);
@@ -98,6 +140,20 @@ export default function Home() {
     }
   }, []);
 
+  // Rozet bildirimi göster
+  const rozetBildirimGoster = useCallback((rozetler) => {
+    if (rozetler.length > 0) {
+      rozetSesi();
+      setRozetBildirimi(rozetler[0]);
+      setTimeout(() => {
+        setRozetBildirimi(null);
+        if (rozetler.length > 1) {
+          rozetBildirimGoster(rozetler.slice(1));
+        }
+      }, 3000);
+    }
+  }, []);
+
   // Yeni oyun başlat
   const yeniOyunBaslat = useCallback((yeniKategori = kategori, yeniUzunluk = uzunluk, yeniMod = mod) => {
     timerTemizle();
@@ -105,13 +161,21 @@ export default function Home() {
     let kelime;
     let hedefUzunluk = yeniUzunluk;
     
-    // Merdiven modunda 4 harften başla
-    if (yeniMod === 'merdiven') {
+    // Günlük mod kontrolü
+    if (yeniMod === 'gunluk') {
+      if (gunlukOynandiMi()) {
+        setGunlukModalAcik(true);
+        return;
+      }
+      kelime = gunlukKelimeGetir(5);
+      hedefUzunluk = 5;
+    } else if (yeniMod === 'merdiven') {
       hedefUzunluk = 4;
       setMerdivenSeviye(4);
+      kelime = rastgeleKelimeUzunluklu(yeniKategori, hedefUzunluk, hedefKelime);
+    } else {
+      kelime = rastgeleKelimeUzunluklu(yeniKategori, hedefUzunluk, hedefKelime);
     }
-    
-    kelime = rastgeleKelimeUzunluklu(yeniKategori, hedefUzunluk, hedefKelime);
     
     setHedefKelime(kelime);
     setTahminler([]);
@@ -128,7 +192,7 @@ export default function Home() {
     setMeydanOkumaModu(false);
     setTimeAttackSkor(0);
     setSurvivalAktif(false);
-    setKelimeAnlami(null);
+    setYeniRozetler([]);
     
     // İpucu hakkını hesapla
     const ist = istatistikGetir();
@@ -142,9 +206,21 @@ export default function Home() {
           if (prev <= 1) {
             timerTemizle();
             setOyunBitti(true);
+            // Time Attack rozetleri
+            const rozetler = rozetKontrol({
+              kazandi: false,
+              mod: 'timeattack',
+              timeAttackSkor,
+              oynanan: istatistikGetir().oynanan
+            });
+            if (rozetler.length > 0) {
+              setYeniRozetler(rozetler);
+              rozetBildirimGoster(rozetler);
+            }
             setTimeout(() => setSonucModalAcik(true), 500);
             return 0;
           }
+          if (prev <= 10) countdownSesi();
           return prev - 1;
         });
       }, 1000);
@@ -154,6 +230,7 @@ export default function Home() {
     if (yeniMod === 'survival') {
       setKalanSure(60);
       setSurvivalAktif(true);
+      setSurvivalBaslangic(Date.now());
       timerRef.current = setInterval(() => {
         setKalanSure(prev => {
           if (prev <= 1) {
@@ -161,14 +238,26 @@ export default function Home() {
             setSurvivalAktif(false);
             setOyunBitti(true);
             setKazandi(false);
+            const survivalSure = Math.floor((Date.now() - survivalBaslangic) / 1000);
+            const rozetler = rozetKontrol({
+              kazandi: false,
+              mod: 'survival',
+              survivalSure,
+              oynanan: istatistikGetir().oynanan
+            });
+            if (rozetler.length > 0) {
+              setYeniRozetler(rozetler);
+              rozetBildirimGoster(rozetler);
+            }
             setTimeout(() => setSonucModalAcik(true), 500);
             return 0;
           }
+          if (prev <= 10) countdownSesi();
           return prev - 1;
         });
       }, 1000);
     }
-  }, [kategori, uzunluk, mod, hedefKelime, timerTemizle]);
+  }, [kategori, uzunluk, mod, hedefKelime, timerTemizle, rozetBildirimGoster, timeAttackSkor, survivalBaslangic]);
 
   // URL'den meydan okuma kelimesini kontrol et
   useEffect(() => {
@@ -180,11 +269,8 @@ export default function Home() {
         const cozulmusKelime = kelimeCoz(sifreliKelime);
         if (cozulmusKelime) {
           setMeydanOkumaModu(true);
-          setMeydanOkumaKelime(cozulmusKelime);
           setHedefKelime(cozulmusKelime);
           setUzunluk(cozulmusKelime.length);
-          
-          // URL'i temizle
           window.history.replaceState({}, '', window.location.pathname);
         }
       }
@@ -198,8 +284,8 @@ export default function Home() {
     setKullanici(kullaniciGetir());
     setLiderlik(liderlikGetir());
     setUzunluklar(mevcutUzunluklar('klasik'));
+    temaRengiBaslat();
     
-    // Meydan okuma modu değilse normal başla
     if (!meydanOkumaModu) {
       const kelime = rastgeleKelimeUzunluklu('klasik', 5, '');
       setHedefKelime(kelime);
@@ -232,36 +318,32 @@ export default function Home() {
     if (mevcutTahmin.length >= hedefKelime.length) return;
     setMevcutTahmin(prev => prev + harf);
     setHataMetni('');
+    if (sesAyariGetir()) tusSesi();
   };
 
   // Harf sil fonksiyonu
   harfSilRef.current = () => {
     if (oyunBitti) return;
+    if (mevcutTahmin.length === 0) return;
     setMevcutTahmin(prev => prev.slice(0, -1));
     setHataMetni('');
+    if (sesAyariGetir()) silSesi();
   };
 
   // Tahmin gönder fonksiyonu
   tahminGonderRef.current = () => {
     if (oyunBitti) return;
     if (!hedefKelime) return;
+    
     if (mevcutTahmin.length !== hedefKelime.length) {
       setSallanim(true);
       setHataMetni(`${hedefKelime.length} harf girmelisin!`);
+      if (sesAyariGetir()) hataSesi();
       setTimeout(() => setSallanim(false), 500);
       return;
     }
 
-    // Zor mod kontrolü
-    if (mod === 'zor' && tahminler.length > 0) {
-      const zorKontrol = zorModKontrol(mevcutTahmin, tahminler, sonuclar);
-      if (!zorKontrol.gecerli) {
-        setSallanim(true);
-        setHataMetni(zorKontrol.mesaj);
-        setTimeout(() => setSallanim(false), 500);
-        return;
-      }
-    }
+    if (sesAyariGetir()) enterSesi();
 
     const sonuc = kontrolEt(mevcutTahmin, hedefKelime);
     const yeniTahminler = [...tahminler, mevcutTahmin];
@@ -292,6 +374,9 @@ export default function Home() {
     const dogruMu = mevcutTahmin.toUpperCase() === hedefKelime.toUpperCase();
     
     if (dogruMu) {
+      // Kazanma sesi
+      if (sesAyariGetir()) kazanmaSesi();
+      
       // Time Attack: devam et
       if (mod === 'timeattack') {
         setTimeAttackSkor(prev => prev + 1);
@@ -307,6 +392,7 @@ export default function Home() {
       // Merdiven: sonraki seviye
       if (mod === 'merdiven') {
         if (merdivenSeviye < 7) {
+          if (sesAyariGetir()) seviyeSesi();
           const yeniSeviye = merdivenSeviye + 1;
           setMerdivenSeviye(yeniSeviye);
           const yeniKelime = rastgeleKelimeUzunluklu(kategori, yeniSeviye, hedefKelime);
@@ -319,6 +405,12 @@ export default function Home() {
         }
       }
 
+      // Günlük mod
+      if (mod === 'gunluk') {
+        gunlukOynandi({ kazandi: true, tahminSayisi: yeniTahminler.length, kelime: hedefKelime });
+        gunlukIstatistikGuncelle(true);
+      }
+
       const yeniIstatistik = kazandiGuncelle(yeniTahminler.length);
       setIstatistik(yeniIstatistik);
       setOyunBitti(true);
@@ -327,8 +419,31 @@ export default function Home() {
       oyunSayisiArtir();
       setLiderlik(liderlikGuncelle());
       
+      // Rozet kontrolü
+      const rozetler = rozetKontrol({
+        kazandi: true,
+        tahminSayisi: yeniTahminler.length,
+        seri: yeniIstatistik.seri,
+        enUzunSeri: yeniIstatistik.enUzunSeri,
+        oynanan: yeniIstatistik.oynanan,
+        mod,
+        kategori,
+        uzunluk: hedefKelime.length,
+        meydanOkuma: meydanOkumaModu,
+        timeAttackSkor,
+        survivalSure: mod === 'survival' ? Math.floor((Date.now() - survivalBaslangic) / 1000) : 0
+      });
+      
+      if (rozetler.length > 0) {
+        setYeniRozetler(rozetler);
+        setTimeout(() => rozetBildirimGoster(rozetler), 1600);
+      }
+      
       setTimeout(() => setSonucModalAcik(true), 1500);
     } else if (yeniTahminler.length >= 6) {
+      // Kaybetme sesi
+      if (sesAyariGetir()) kaybetmeSesi();
+      
       // Merdiven: başa dön
       if (mod === 'merdiven') {
         setMerdivenSeviye(4);
@@ -343,6 +458,12 @@ export default function Home() {
         return;
       }
 
+      // Günlük mod
+      if (mod === 'gunluk') {
+        gunlukOynandi({ kazandi: false, tahminSayisi: 6, kelime: hedefKelime });
+        gunlukIstatistikGuncelle(false);
+      }
+
       const yeniIstatistik = kaybettiGuncelle();
       setIstatistik(yeniIstatistik);
       setOyunBitti(true);
@@ -350,6 +471,23 @@ export default function Home() {
       timerTemizle();
       oyunSayisiArtir();
       setLiderlik(liderlikGuncelle());
+      
+      // Rozet kontrolü (kaybetme için de bazı rozetler)
+      const rozetler = rozetKontrol({
+        kazandi: false,
+        tahminSayisi: 6,
+        seri: 0,
+        enUzunSeri: yeniIstatistik.enUzunSeri,
+        oynanan: yeniIstatistik.oynanan,
+        mod,
+        kategori,
+        uzunluk: hedefKelime.length
+      });
+      
+      if (rozetler.length > 0) {
+        setYeniRozetler(rozetler);
+        setTimeout(() => rozetBildirimGoster(rozetler), 1600);
+      }
       
       setTimeout(() => setSonucModalAcik(true), 1500);
     }
@@ -360,8 +498,8 @@ export default function Home() {
     const handleKeyDown = (e) => {
       if (oyunBitti) return;
       
-      // Modal açıkken klavyeyi devre dışı bırak
-      if (bilgiModalAcik || sonucModalAcik || liderlikModalAcik || kategoriModalAcik || modModalAcik || meydanOkumaModalAcik) {
+      if (bilgiModalAcik || sonucModalAcik || liderlikModalAcik || kategoriModalAcik || 
+          modModalAcik || meydanOkumaModalAcik || rozetlerModalAcik || ayarlarModalAcik || gunlukModalAcik) {
         return;
       }
       
@@ -374,7 +512,6 @@ export default function Home() {
         e.preventDefault();
         if (harfSilRef.current) harfSilRef.current();
       } else if (/^[A-ZÇĞİÖŞÜIı]$/i.test(key)) {
-        // I ve ı harflerini düzelt
         let harf = key;
         if (harf === 'I') harf = 'I';
         if (harf === 'ı' || harf === 'Ι') harf = 'I';
@@ -384,7 +521,8 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [oyunBitti, bilgiModalAcik, sonucModalAcik, liderlikModalAcik, kategoriModalAcik, modModalAcik, meydanOkumaModalAcik]);
+  }, [oyunBitti, bilgiModalAcik, sonucModalAcik, liderlikModalAcik, kategoriModalAcik, 
+      modModalAcik, meydanOkumaModalAcik, rozetlerModalAcik, ayarlarModalAcik, gunlukModalAcik]);
 
   // İpucu kullan
   const ipucuKullan = () => {
@@ -394,6 +532,7 @@ export default function Home() {
     if (ipucu) {
       setKullanilanIpucu(prev => [...prev, ipucu]);
       setIpucuHakki(prev => prev - 1);
+      if (sesAyariGetir()) ipucuSesi();
     }
   };
 
@@ -456,6 +595,9 @@ export default function Home() {
     if (mod === 'merdiven') {
       return `Wordletr 🪜 Merdiven\n${merdivenSeviye} harfe ulaştım!\n\nhttps://wordletr.vercel.app`;
     }
+    if (mod === 'gunluk') {
+      return `Wordletr 📅 Günlük\n${kazandi ? `${tahminler.length}/6` : 'X/6'}\n\nhttps://wordletr.vercel.app`;
+    }
     return paylasimMetni(tahminler, hedefKelime, oyunSayisi);
   };
 
@@ -484,6 +626,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col">
+      {/* Rozet bildirimi */}
+      {rozetBildirimi && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+          <div className="px-6 py-4 rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-2xl flex items-center gap-3">
+            <span className="text-3xl">{rozetBildirimi.emoji}</span>
+            <div>
+              <p className="font-bold">Yeni Rozet!</p>
+              <p className="text-sm opacity-90">{rozetBildirimi.isim}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Header 
         onBilgi={() => setBilgiModalAcik(true)}
         onIstatistik={() => {
@@ -491,22 +646,25 @@ export default function Home() {
           setSonucModalAcik(true);
         }}
         onLogoTikla={handleLogoTikla}
-        onLiderlik={() => {
+        onLiderlik={async () => {
           setLiderlik(liderlikGetir());
           setLiderlikModalAcik(true);
+          try {
+            const apiLiderlik = await liderlikGetirAPI();
+            setLiderlik(apiLiderlik);
+          } catch (e) {}
         }}
         onMeydanOkuma={() => setMeydanOkumaModalAcik(true)}
+        onRozetler={() => setRozetlerModalAcik(true)}
+        onAyarlar={() => setAyarlarModalAcik(true)}
+        rozetSayisi={`${kazanilanRozetSayisi()}/${toplamRozetSayisi()}`}
       />
 
       <main className="flex-1 flex flex-col items-center py-4 px-4 max-w-xl mx-auto w-full">
         
-        {/* ÜST MENÜ - Mod ve Kategori Yazılı */}
+        {/* ÜST MENÜ */}
         <div className="top-menu w-full">
-          {/* Kategori */}
-          <button 
-            onClick={() => setKategoriModalAcik(true)}
-            className="menu-item"
-          >
+          <button onClick={() => setKategoriModalAcik(true)} className="menu-item">
             <span className="emoji">{mevcutKategoriInfo.emoji}</span>
             <div className="flex flex-col items-start">
               <span className="label">Kategori</span>
@@ -514,11 +672,7 @@ export default function Home() {
             </div>
           </button>
 
-          {/* Mod */}
-          <button 
-            onClick={() => setModModalAcik(true)}
-            className="menu-item"
-          >
+          <button onClick={() => setModModalAcik(true)} className="menu-item">
             <span className="emoji">{mevcutModInfo.emoji}</span>
             <div className="flex flex-col items-start">
               <span className="label">Mod</span>
@@ -526,11 +680,10 @@ export default function Home() {
             </div>
           </button>
 
-          {/* İpucu */}
           <button 
             onClick={ipucuKullan}
-            disabled={ipucuHakki <= 0 || oyunBitti || mod === 'kor'}
-            className={`menu-item ${ipucuHakki <= 0 || oyunBitti || mod === 'kor' ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={ipucuHakki <= 0 || oyunBitti || mod === 'kor' || mod === 'gunluk'}
+            className={`menu-item ${ipucuHakki <= 0 || oyunBitti || mod === 'kor' || mod === 'gunluk' ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <span className="emoji">💡</span>
             <div className="flex flex-col items-start">
@@ -541,7 +694,7 @@ export default function Home() {
         </div>
 
         {/* Uzunluk seçici */}
-        {mod !== 'merdiven' && (
+        {mod !== 'merdiven' && mod !== 'gunluk' && (
           <div className="length-selector w-full my-3">
             {[4, 5, 6, 7].map(u => (
               <button
@@ -572,18 +725,19 @@ export default function Home() {
           </div>
         )}
 
-        {/* Timer göstergesi */}
-        {(mod === 'timeattack' || mod === 'survival') && (
+        {/* Timer göstergesi - Survival */}
+        {mod === 'survival' && (
           <div className="flex items-center justify-center gap-4 my-3">
             <div className={`timer-display ${kalanSure <= 10 ? 'warning' : ''}`}>
               {sureFormatla(kalanSure)}
             </div>
-            {mod === 'timeattack' && (
-              <div className="timer-display">
-                <span className="text-sm opacity-70 mr-2">Skor:</span>
-                <span>{timeAttackSkor}</span>
-              </div>
-            )}
+          </div>
+        )}
+
+        {/* Günlük mod bildirimi */}
+        {mod === 'gunluk' && (
+          <div className="hint-box w-full my-3">
+            📅 Günlük Challenge — Tek hak, herkes aynı kelime!
           </div>
         )}
 
@@ -609,10 +763,7 @@ export default function Home() {
         {mod === 'kor' && korModSonuclar.length > 0 && (
           <div className="w-full my-2">
             {korModSonuclar.map((sonuc, i) => (
-              <div 
-                key={i}
-                className="menu-item justify-center mb-2"
-              >
+              <div key={i} className="menu-item justify-center mb-2">
                 🔢 <strong>{sonuc.dogruYer}</strong> doğru yerde, <strong>{sonuc.yanliyer}</strong> yanlış yerde
               </div>
             ))}
@@ -647,21 +798,12 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Bilgi modalı */}
-      <Modal
-        acik={bilgiModalAcik}
-        kapat={() => setBilgiModalAcik(false)}
-        baslik="Nasıl Oynanır?"
-      >
+      {/* MODALS */}
+      <Modal acik={bilgiModalAcik} kapat={() => setBilgiModalAcik(false)} baslik="Nasıl Oynanır?">
         <NasilOynanirIcerigi />
       </Modal>
 
-      {/* Sonuç modalı */}
-      <Modal
-        acik={sonucModalAcik}
-        kapat={() => setSonucModalAcik(false)}
-        baslik={oyunBitti ? (kazandi ? '🎉 Tebrikler!' : 'Oyun Bitti') : 'İstatistikler'}
-      >
+      <Modal acik={sonucModalAcik} kapat={() => setSonucModalAcik(false)} baslik={oyunBitti ? (kazandi ? '🎉 Tebrikler!' : 'Oyun Bitti') : 'İstatistikler'}>
         {istatistik && (
           <SonucIcerigi
             kazandi={kazandi}
@@ -674,16 +816,12 @@ export default function Home() {
             mod={mod}
             timeAttackSkor={timeAttackSkor}
             merdivenSeviye={merdivenSeviye}
+            yeniRozetler={yeniRozetler}
           />
         )}
       </Modal>
 
-      {/* Liderlik modalı */}
-      <Modal
-        acik={liderlikModalAcik}
-        kapat={() => setLiderlikModalAcik(false)}
-        baslik="🏆 Liderlik Tablosu"
-      >
+      <Modal acik={liderlikModalAcik} kapat={() => setLiderlikModalAcik(false)} baslik="🏆 Liderlik Tablosu">
         <LiderlikIcerigi
           liderlik={liderlik}
           mevcutKullaniciId={kullanici.id}
@@ -692,12 +830,7 @@ export default function Home() {
         />
       </Modal>
 
-      {/* Kategori modalı */}
-      <Modal
-        acik={kategoriModalAcik}
-        kapat={() => setKategoriModalAcik(false)}
-        baslik="Kategori Seç"
-      >
+      <Modal acik={kategoriModalAcik} kapat={() => setKategoriModalAcik(false)} baslik="Kategori Seç">
         <KategoriSeciciIcerigi
           kategoriler={kategoriler}
           mevcutKategori={kategori}
@@ -705,28 +838,29 @@ export default function Home() {
         />
       </Modal>
 
-      {/* Mod modalı */}
-      <Modal
-        acik={modModalAcik}
-        kapat={() => setModModalAcik(false)}
-        baslik="Oyun Modu"
-      >
+      <Modal acik={modModalAcik} kapat={() => setModModalAcik(false)} baslik="Oyun Modu">
         <ModSeciciIcerigi
           modlar={MODLAR}
           mevcutMod={mod}
           onModSec={handleModDegis}
+          gunlukOynandi={gunlukOynandiMi()}
         />
       </Modal>
 
-      {/* Meydan Okuma modalı */}
-      <Modal
-        acik={meydanOkumaModalAcik}
-        kapat={() => setMeydanOkumaModalAcik(false)}
-        baslik="🎯 Meydan Okuma"
-      >
-        <MeydanOkumaIcerigi
-          onLinkOlustur={meydanOkumaLinkiOlustur}
-        />
+      <Modal acik={meydanOkumaModalAcik} kapat={() => setMeydanOkumaModalAcik(false)} baslik="🎯 Meydan Okuma">
+        <MeydanOkumaIcerigi onLinkOlustur={meydanOkumaLinkiOlustur} />
+      </Modal>
+
+      <Modal acik={rozetlerModalAcik} kapat={() => setRozetlerModalAcik(false)} baslik="🏅 Rozetler">
+        <RozetlerIcerigi rozetler={tumRozetler()} />
+      </Modal>
+
+      <Modal acik={ayarlarModalAcik} kapat={() => setAyarlarModalAcik(false)} baslik="⚙️ Ayarlar">
+        <AyarlarIcerigi />
+      </Modal>
+
+      <Modal acik={gunlukModalAcik} kapat={() => setGunlukModalAcik(false)} baslik="📅 Günlük Challenge">
+        <GunlukIcerigi />
       </Modal>
     </div>
   );

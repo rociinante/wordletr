@@ -29,27 +29,27 @@ export default function Klavye({ onTus, harfDurumlari = {}, ingilizce = false })
     return !ingilizce && TURKCE_OZEL.includes(tus);
   };
 
-  // I ve İ için özel gösterim
+  // I ve İ için çok belirgin özel gösterim
   const harfGoster = (tus) => {
     if (tus === 'BACKSPACE') return '⌫';
     if (tus === 'ENTER') return '↵';
     
-    // I harfi için altına çizgi ekle (noktasız olduğunu göstermek için)
+    // I harfi (noktasız) - altında çizgi ile göster
     if (tus === 'I' && !ingilizce) {
       return (
         <span className="flex flex-col items-center leading-none">
-          <span>I</span>
-          <span className="text-[8px] opacity-60 -mt-1">ı</span>
+          <span className="text-[15px] font-bold">I</span>
+          <span className="text-[6px] -mt-0.5 opacity-80">▬</span>
         </span>
       );
     }
     
-    // İ harfi için üstte nokta vurgula
+    // İ harfi (noktalı) - üstte büyük nokta
     if (tus === 'İ') {
       return (
         <span className="flex flex-col items-center leading-none">
-          <span className="text-[8px] opacity-80">•</span>
-          <span className="-mt-1">I</span>
+          <span className="text-[8px] -mb-0.5 text-purple-400">●</span>
+          <span className="text-[15px] font-bold">I</span>
         </span>
       );
     }
@@ -65,14 +65,15 @@ export default function Klavye({ onTus, harfDurumlari = {}, ingilizce = false })
             const durum = tusDurumu(tus);
             const ozelTus = tus === 'ENTER' || tus === 'BACKSPACE';
             const turkceOzel = turkceOzelMi(tus);
+            const iHarfiMi = tus === 'I' || tus === 'İ';
             
             return (
               <button
                 key={tus}
                 onClick={() => onTus(tus)}
-                className={`klavye-tus ${durum} ${ozelTus ? 'ozel' : ''} ${turkceOzel ? 'turkce-ozel' : ''}`}
+                className={`klavye-tus ${durum} ${ozelTus ? 'ozel' : ''} ${iHarfiMi ? 'i-harfi' : ''}`}
                 style={{
-                  minWidth: ozelTus ? '70px' : turkceOzel ? '36px' : '34px',
+                  minWidth: ozelTus ? '70px' : iHarfiMi ? '40px' : turkceOzel ? '36px' : '34px',
                 }}
               >
                 {harfGoster(tus)}
