@@ -4,7 +4,7 @@
   "description": "Her gün yeni bir kelime tahmin et! Türkçe Wordle deneyimi.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fafbfc",
+  "background_color": "#e8e8ed",
   "theme_color": "#8b5cf6",
   "orientation": "portrait",
   "icons": [
