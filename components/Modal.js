@@ -276,6 +276,10 @@ function KelimeAnlami({ kelime }) {
   useEffect(() => {
     if (!kelime) return;
 
+    // Türkçe uyumlu büyük harf
+    const turkceUpper = (str) => str.replace(/i/g, 'İ').replace(/ı/g, 'I').toUpperCase();
+    const turkceLower = (str) => str.replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase();
+
     // Önce cache'e bak
     const cacheKey = `wordletr_anlam_${kelime}`;
     const cached = localStorage.getItem(cacheKey);
@@ -286,7 +290,7 @@ function KelimeAnlami({ kelime }) {
     }
 
     // Sözlükte ara
-    const sozlukAnlam = SOZLUK[kelime.toUpperCase()];
+    const sozlukAnlam = SOZLUK[turkceUpper(kelime)];
     
     if (sozlukAnlam) {
       const sonuc = {
@@ -302,7 +306,7 @@ function KelimeAnlami({ kelime }) {
         kelime,
         anlam: `Türk Dil Kurumu sözlüğünden arayabilirsin.`,
         ornek: null,
-        tdkLink: `https://sozluk.gov.tr/?kelime=${encodeURIComponent(kelime.toLowerCase())}`
+        tdkLink: `https://sozluk.gov.tr/?kelime=${encodeURIComponent(turkceLower(kelime))}`
       });
     }
   }, [kelime]);
