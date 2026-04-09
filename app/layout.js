@@ -6,7 +6,6 @@ export const metadata = {
   keywords: 'wordle, türkçe, kelime oyunu, bulmaca, günlük oyun, kelime tahmin, iyi kelime, iyikelime',
   authors: [{ name: 'İyiKelime' }],
   manifest: '/manifest.json',
-  themeColor: '#8b5cf6',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
@@ -26,7 +25,8 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  viewportFit: 'cover'
+  viewportFit: 'cover',
+  themeColor: '#8b5cf6'
 }
 
 export default function RootLayout({ children }) {
