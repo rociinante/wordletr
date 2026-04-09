@@ -1,6 +1,6 @@
-# Wordletr 🎮
+# İyi Kelime 🎮
 
-Türkçe Wordle deneyimi! 6 farklı modda oyna, rozetler kazan, arkadaşlarına meydan oku.
+iyikelime.com — Türkçe Wordle deneyimi! 6 farklı modda oyna, rozetler kazan, arkadaşlarına meydan oku.
 
 ## ✨ Özellikler
 
@@ -34,8 +34,8 @@ npm run dev
 1. `api/liderlik.php` → `/public_html/api/liderlik.php`
 2. `lib/depolama.js` satır 4'ü güncelle:
    ```javascript
-   const API_URL = 'https://senin-domain.com/api/liderlik.php';
+   const API_URL = 'https://iyikelime.com/api/liderlik.php';
    ```
 3. PWA ikonları ekle: `icon-192.png`, `icon-512.png`
 
-Made with 💜
+Made with 💜 for iyikelime.com

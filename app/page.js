@@ -812,53 +812,58 @@ export default function Home() {
           </div>
         )}
 
-        {/* Gizli mobil input */}
-        <input
-          ref={mobilInputRef}
-          type="text"
-          inputMode="text"
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="characters"
-          spellCheck="false"
-          className="mobile-input"
-          onInput={(e) => {
-            if (oyunBitti || !hedefKelime) return;
-            
-            const value = e.target.value || '';
-            
-            // Geçerli harfleri topla
-            let yeniHarfler = '';
-            for (const karakter of value) {
-              if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(karakter)) {
-                let harf = karakter.toUpperCase();
-                if (karakter === 'i') harf = 'İ';
-                if (karakter === 'ı') harf = 'I';
-                yeniHarfler += harf;
+        {/* Mobil input form */}
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (tahminGonderRef.current) tahminGonderRef.current();
+          }}
+          style={{ position: 'absolute', left: '-9999px' }}
+        >
+          <input
+            ref={mobilInputRef}
+            type="text"
+            inputMode="text"
+            enterKeyHint="go"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="characters"
+            spellCheck="false"
+            onInput={(e) => {
+              if (oyunBitti || !hedefKelime) return;
+              
+              const value = e.target.value || '';
+              
+              // Geçerli harfleri topla
+              let yeniHarfler = '';
+              for (const karakter of value) {
+                if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(karakter)) {
+                  let harf = karakter.toUpperCase();
+                  if (karakter === 'i') harf = 'İ';
+                  if (karakter === 'ı') harf = 'I';
+                  yeniHarfler += harf;
+                }
               }
-            }
-            
-            if (yeniHarfler) {
-              setMevcutTahmin(prev => {
-                const yeni = prev + yeniHarfler;
-                return yeni.slice(0, hedefKelime.length);
-              });
-              setHataMetni('');
-            }
-            
-            // Input'u temizle
-            e.target.value = '';
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              if (tahminGonderRef.current) tahminGonderRef.current();
-            } else if (e.key === 'Backspace') {
-              e.preventDefault();
-              if (harfSilRef.current) harfSilRef.current();
-            }
-          }}
-        />
+              
+              if (yeniHarfler) {
+                setMevcutTahmin(prev => {
+                  const yeni = prev + yeniHarfler;
+                  return yeni.slice(0, hedefKelime.length);
+                });
+                setHataMetni('');
+              }
+              
+              // Input'u temizle
+              e.target.value = '';
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Backspace') {
+                e.preventDefault();
+                if (harfSilRef.current) harfSilRef.current();
+              }
+            }}
+          />
+        </form>
 
         {/* Oyun tahtası */}
         <div 

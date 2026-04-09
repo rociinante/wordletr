@@ -30,7 +30,8 @@ export default function Header({
 
           {/* Orta - Logo */}
           <button className="logo" onClick={onLogoTikla}>
-            WORDLETR
+            <span className="logo-iyi">İYİ</span>
+            <span className="logo-kelime">KELİME</span>
           </button>
 
           {/* Sağ - Menü butonu */}
@@ -57,7 +58,7 @@ export default function Header({
         >
           {/* Menü Header */}
           <div className="menu-header">
-            <span className="menu-logo">WORDLETR</span>
+            <span className="menu-logo">İYİ KELİME</span>
             <button className="menu-close" onClick={() => setMenuAcik(false)}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M18 6L6 18M6 6l12 12"/>
@@ -143,7 +144,7 @@ export default function Header({
 
           {/* Menü Footer */}
           <div className="menu-footer">
-            <span>Wordletr v7</span>
+            <span>iyikelime.com</span>
             <span>•</span>
             <span>Türkçe Kelime Oyunu</span>
           </div>

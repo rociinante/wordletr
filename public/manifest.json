@@ -1,10 +1,10 @@
 {
-  "name": "Wordletr - Türkçe Kelime Oyunu",
-  "short_name": "Wordletr",
+  "name": "İyi Kelime - Türkçe Kelime Oyunu",
+  "short_name": "İyi Kelime",
   "description": "Her gün yeni bir kelime tahmin et! Türkçe Wordle deneyimi.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#e8e8ed",
+  "background_color": "#1a1a2e",
   "theme_color": "#8b5cf6",
   "orientation": "portrait",
   "icons": [
