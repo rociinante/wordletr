@@ -1,19 +1,19 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'İyi Kelime - Türkçe Kelime Oyunu',
+  title: 'İyiKelime.com | Türkçe Kelime Oyunu',
   description: 'Her gün yeni bir kelime tahmin et! Türkçe Wordle deneyimi. 6 modda oyna, rozetler kazan, arkadaşlarına meydan oku!',
-  keywords: 'wordle, türkçe, kelime oyunu, bulmaca, günlük oyun, kelime tahmin, iyi kelime',
-  authors: [{ name: 'İyi Kelime' }],
+  keywords: 'wordle, türkçe, kelime oyunu, bulmaca, günlük oyun, kelime tahmin, iyi kelime, iyikelime',
+  authors: [{ name: 'İyiKelime' }],
   manifest: '/manifest.json',
   themeColor: '#8b5cf6',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'İyi Kelime'
+    title: 'İyiKelime'
   },
   openGraph: {
-    title: 'İyi Kelime - Türkçe Kelime Oyunu',
+    title: 'İyiKelime.com | Türkçe Kelime Oyunu',
     description: 'Her gün yeni bir kelime tahmin et!',
     type: 'website',
     locale: 'tr_TR',

@@ -13,7 +13,8 @@ import Modal, {
   MeydanOkumaIcerigi,
   RozetlerIcerigi,
   AyarlarIcerigi,
-  GunlukIcerigi
+  GunlukIcerigi,
+  KayitIcerigi
 } from '../components/Modal';
 import { kontrolEt, klavyeGuncelle, paylasimMetni, korModSonuc } from '../lib/oyunMotoru';
 import { 
@@ -121,6 +122,7 @@ export default function Home() {
   const [rozetlerModalAcik, setRozetlerModalAcik] = useState(false);
   const [ayarlarModalAcik, setAyarlarModalAcik] = useState(false);
   const [gunlukModalAcik, setGunlukModalAcik] = useState(false);
+  const [kayitModalAcik, setKayitModalAcik] = useState(false);
   const [istatistik, setIstatistik] = useState(null);
   const [kategoriler, setKategoriler] = useState({});
   const [uzunluklar, setUzunluklar] = useState([5]);
@@ -132,6 +134,13 @@ export default function Home() {
   const harfEkleRef = useRef(null);
   const harfSilRef = useRef(null);
   const tahminGonderRef = useRef(null);
+
+  // Kayıt modal event listener
+  useEffect(() => {
+    const handleKayitModalAc = () => setKayitModalAcik(true);
+    window.addEventListener('kayitModalAc', handleKayitModalAc);
+    return () => window.removeEventListener('kayitModalAc', handleKayitModalAc);
+  }, []);
 
   // Timer'ı temizle
   const timerTemizle = useCallback(() => {
@@ -952,6 +961,15 @@ export default function Home() {
 
       <Modal acik={gunlukModalAcik} kapat={() => setGunlukModalAcik(false)} baslik="📅 Günlük Challenge">
         <GunlukIcerigi />
+      </Modal>
+
+      <Modal acik={kayitModalAcik} kapat={() => setKayitModalAcik(false)} baslik="🚀 Hızlı Kayıt">
+        <KayitIcerigi 
+          onKapat={() => setKayitModalAcik(false)}
+          onBasarili={(kullanici) => {
+            setKullanici({ ad: kullanici.kullaniciAdi, id: kullanici.email });
+          }}
+        />
       </Modal>
     </div>
   );

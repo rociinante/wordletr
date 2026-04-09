@@ -193,6 +193,27 @@ export function SonucIcerigi({
           </button>
         )}
       </div>
+
+      {/* İlk oyun sonrası kayıt önerisi */}
+      {oyunBitti && istatistik.oynanan === 1 && (
+        <div className="kayit-oneri">
+          <div className="kayit-oneri-icon">🏆</div>
+          <p className="kayit-oneri-baslik">Skorunu Kaydet!</p>
+          <p className="kayit-oneri-aciklama">
+            Skorun kaydolması ve sıralamaya girebilmek için hesap açabilirsin!
+          </p>
+          <button 
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('kayitModalAc'));
+              }
+            }}
+            className="btn-primary w-full mt-3"
+          >
+            Hızlı Kayıt Ol 🚀
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -824,5 +845,130 @@ export function GunlukIcerigi() {
         🔄 Yeni kelime her gece 00:00'da
       </p>
     </div>
+  );
+}
+
+// Kayıt formu içeriği
+export function KayitIcerigi({ onKapat, onBasarili }) {
+  const [kullaniciAdi, setKullaniciAdi] = useState('');
+  const [email, setEmail] = useState('');
+  const [sifre, setSifre] = useState('');
+  const [yukleniyor, setYukleniyor] = useState(false);
+  const [hata, setHata] = useState('');
+  const [basarili, setBasarili] = useState(false);
+
+  const handleKayit = async (e) => {
+    e.preventDefault();
+    setHata('');
+    
+    // Basit doğrulama
+    if (!kullaniciAdi.trim() || kullaniciAdi.length < 3) {
+      setHata('Kullanıcı adı en az 3 karakter olmalı');
+      return;
+    }
+    if (!email.includes('@')) {
+      setHata('Geçerli bir e-posta adresi girin');
+      return;
+    }
+    if (sifre.length < 4) {
+      setHata('Şifre en az 4 karakter olmalı');
+      return;
+    }
+
+    setYukleniyor(true);
+
+    // localStorage'a kaydet (gerçek API yerine)
+    try {
+      const kullanici = {
+        kullaniciAdi: kullaniciAdi.trim(),
+        email: email.trim(),
+        kayitTarihi: new Date().toISOString()
+      };
+      localStorage.setItem('iyikelime_kullanici', JSON.stringify(kullanici));
+      localStorage.setItem('iyikelime_giris', 'true');
+      
+      setBasarili(true);
+      setTimeout(() => {
+        if (onBasarili) onBasarili(kullanici);
+        if (onKapat) onKapat();
+      }, 1500);
+    } catch (err) {
+      setHata('Bir hata oluştu, tekrar deneyin');
+    } finally {
+      setYukleniyor(false);
+    }
+  };
+
+  if (basarili) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-6xl mb-4">🎉</div>
+        <p className="text-xl font-bold text-green-400">Hoş Geldin!</p>
+        <p className="text-sm opacity-70 mt-2">Hesabın başarıyla oluşturuldu</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleKayit} className="space-y-4">
+      <p className="text-sm text-center opacity-70 mb-4">
+        Hızlıca kayıt ol, skorlarını kaydet ve sıralamada yerini al!
+      </p>
+
+      <div className="form-group">
+        <label className="form-label">Kullanıcı Adı</label>
+        <input
+          type="text"
+          value={kullaniciAdi}
+          onChange={(e) => setKullaniciAdi(e.target.value)}
+          placeholder="örn: kelimeci123"
+          className="form-input"
+          maxLength={20}
+          autoComplete="username"
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">E-posta</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="ornek@mail.com"
+          className="form-input"
+          autoComplete="email"
+        />
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">Şifre</label>
+        <input
+          type="password"
+          value={sifre}
+          onChange={(e) => setSifre(e.target.value)}
+          placeholder="••••••"
+          className="form-input"
+          autoComplete="new-password"
+        />
+      </div>
+
+      {hata && (
+        <div className="error-box">
+          {hata}
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={yukleniyor}
+        className="btn-primary w-full"
+      >
+        {yukleniyor ? 'Kaydediliyor...' : 'Kayıt Ol 🚀'}
+      </button>
+
+      <p className="text-xs text-center opacity-50">
+        Kayıt olarak kullanım şartlarını kabul etmiş olursunuz
+      </p>
+    </form>
   );
 }

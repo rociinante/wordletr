@@ -1,10 +1,10 @@
 {
-  "name": "İyi Kelime - Türkçe Kelime Oyunu",
-  "short_name": "İyi Kelime",
+  "name": "İyiKelime.com | Türkçe Kelime Oyunu",
+  "short_name": "İyiKelime",
   "description": "Her gün yeni bir kelime tahmin et! Türkçe Wordle deneyimi.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1a1a2e",
+  "background_color": "#0a0a12",
   "theme_color": "#8b5cf6",
   "orientation": "portrait",
   "icons": [
