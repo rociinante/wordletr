@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { temaToggle, temaGetir } from '../lib/depolama';
+import { useState } from 'react';
 
 export default function Header({ 
   onBilgi, 
@@ -11,116 +10,145 @@ export default function Header({
   onMeydanOkuma,
   onRozetler,
   onAyarlar,
-  rozetSayisi = '0/0'
+  rozetSayisi = '0/0',
+  istatistik = {}
 }) {
-  const [tema, setTema] = useState('dark');
+  const [menuAcik, setMenuAcik] = useState(false);
 
-  useEffect(() => {
-    setTema(temaGetir());
-  }, []);
-
-  const handleTemaToggle = () => {
-    const yeniTema = temaToggle();
-    setTema(yeniTema);
-  };
+  const seri = istatistik?.seri || 0;
 
   return (
-    <header className="header">
-      <div className="header-container">
-        {/* Sol taraf */}
-        <div className="flex items-center gap-1">
-          <button 
-            onClick={onLiderlik}
-            className="header-btn"
-            title="Liderlik Tablosu"
-            aria-label="Liderlik Tablosu"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-              <path d="M4 22h16"/>
-              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-            </svg>
+    <>
+      {/* Ana Header */}
+      <header className="header">
+        <div className="header-content">
+          {/* Sol - Seri göstergesi */}
+          <div className="header-streak" onClick={onIstatistik}>
+            <span className="streak-fire">🔥</span>
+            <span className="streak-count">{seri}</span>
+          </div>
+
+          {/* Orta - Logo */}
+          <button className="logo" onClick={onLogoTikla}>
+            WORDLETR
           </button>
+
+          {/* Sağ - Menü butonu */}
           <button 
-            onClick={onMeydanOkuma}
-            className="header-btn"
-            title="Meydan Okuma"
-            aria-label="Meydan Okuma"
+            className={`hamburger ${menuAcik ? 'aktif' : ''}`}
+            onClick={() => setMenuAcik(!menuAcik)}
+            aria-label="Menü"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="12" cy="12" r="6"/>
-              <circle cx="12" cy="12" r="2"/>
-            </svg>
-          </button>
-          <button 
-            onClick={onRozetler}
-            className="header-btn relative"
-            title="Rozetler"
-            aria-label="Rozetler"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="8" r="6"/>
-              <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
-            </svg>
-            <span className="absolute -top-1 -right-1 text-[9px] font-bold px-1 rounded-full bg-gradient-to-r from-purple-500 to-pink-500">
-              {rozetSayisi.split('/')[0]}
-            </span>
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
         </div>
+      </header>
 
-        {/* Logo */}
-        <button 
-          onClick={onLogoTikla}
-          className="logo"
-          title="Yeni oyun başlat"
-          aria-label="Yeni oyun başlat"
+      {/* Slide Menu Overlay */}
+      <div 
+        className={`menu-overlay ${menuAcik ? 'aktif' : ''}`} 
+        onClick={() => setMenuAcik(false)}
+      >
+        <nav 
+          className={`slide-menu ${menuAcik ? 'aktif' : ''}`} 
+          onClick={e => e.stopPropagation()}
         >
-          WORDLETR
-        </button>
+          {/* Menü Header */}
+          <div className="menu-header">
+            <span className="menu-logo">WORDLETR</span>
+            <button className="menu-close" onClick={() => setMenuAcik(false)}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
 
-        {/* Sağ taraf */}
-        <div className="flex items-center gap-1">
-          <button 
-            onClick={onBilgi}
-            className="header-btn"
-            title="Nasıl Oynanır?"
-            aria-label="Nasıl Oynanır?"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-              <path d="M12 17h.01"/>
-            </svg>
-          </button>
-          <button 
-            onClick={onIstatistik}
-            className="header-btn"
-            title="İstatistikler"
-            aria-label="İstatistikler"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-          </button>
-          <button 
-            onClick={onAyarlar}
-            className="header-btn"
-            title="Ayarlar"
-            aria-label="Ayarlar"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
-        </div>
+          {/* Menü İçerik */}
+          <div className="menu-body">
+            {/* Profil/Stats Kartı */}
+            <div className="menu-profile" onClick={() => { onIstatistik(); setMenuAcik(false); }}>
+              <div className="profile-avatar">
+                <span>🎮</span>
+              </div>
+              <div className="profile-stats">
+                <div className="profile-stat">
+                  <span className="stat-value">{istatistik?.toplam || 0}</span>
+                  <span className="stat-label">Oyun</span>
+                </div>
+                <div className="profile-stat">
+                  <span className="stat-value">{istatistik?.kazanilan || 0}</span>
+                  <span className="stat-label">Kazanma</span>
+                </div>
+                <div className="profile-stat">
+                  <span className="stat-value">{seri}</span>
+                  <span className="stat-label">🔥 Seri</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Menü Öğeleri */}
+            <div className="menu-section">
+              <button className="menu-item" onClick={() => { onMeydanOkuma(); setMenuAcik(false); }}>
+                <div className="menu-item-icon gradient-daily">📅</div>
+                <div className="menu-item-content">
+                  <span className="menu-item-title">Günlük Meydan Okuma</span>
+                  <span className="menu-item-desc">Her gün yeni kelime</span>
+                </div>
+                <span className="menu-item-arrow">→</span>
+              </button>
+
+              <button className="menu-item" onClick={() => { onLiderlik(); setMenuAcik(false); }}>
+                <div className="menu-item-icon gradient-gold">🏆</div>
+                <div className="menu-item-content">
+                  <span className="menu-item-title">Liderlik Tablosu</span>
+                  <span className="menu-item-desc">En iyilerle yarış</span>
+                </div>
+                <span className="menu-item-arrow">→</span>
+              </button>
+
+              <button className="menu-item" onClick={() => { onRozetler(); setMenuAcik(false); }}>
+                <div className="menu-item-icon gradient-purple">🎖️</div>
+                <div className="menu-item-content">
+                  <span className="menu-item-title">Rozetler</span>
+                  <span className="menu-item-desc">{rozetSayisi} kazanıldı</span>
+                </div>
+                <span className="menu-item-arrow">→</span>
+              </button>
+            </div>
+
+            <div className="menu-divider"></div>
+
+            <div className="menu-section">
+              <button className="menu-item" onClick={() => { onAyarlar(); setMenuAcik(false); }}>
+                <div className="menu-item-icon">⚙️</div>
+                <div className="menu-item-content">
+                  <span className="menu-item-title">Ayarlar</span>
+                  <span className="menu-item-desc">Ses, tema ve daha fazlası</span>
+                </div>
+                <span className="menu-item-arrow">→</span>
+              </button>
+
+              <button className="menu-item" onClick={() => { onBilgi(); setMenuAcik(false); }}>
+                <div className="menu-item-icon">❓</div>
+                <div className="menu-item-content">
+                  <span className="menu-item-title">Nasıl Oynanır</span>
+                  <span className="menu-item-desc">Kurallar ve ipuçları</span>
+                </div>
+                <span className="menu-item-arrow">→</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Menü Footer */}
+          <div className="menu-footer">
+            <span>Wordletr v7</span>
+            <span>•</span>
+            <span>Türkçe Kelime Oyunu</span>
+          </div>
+        </nav>
       </div>
-    </header>
+    </>
   );
 }

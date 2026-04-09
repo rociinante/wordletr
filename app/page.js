@@ -560,19 +560,20 @@ export default function Home() {
   // Mobil input değişikliği
   const handleMobilInput = (e) => {
     if (oyunBitti) return;
-    const value = e.target.value;
-    if (!value) return;
+    if (!hedefKelime) return;
     
-    // Son karakteri al
-    const sonKarakter = value.slice(-1);
+    const value = e.target.value || '';
     
-    // Geçerli harf mi kontrol et
-    if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(sonKarakter)) {
-      let harf = sonKarakter.toUpperCase();
-      // Türkçe i/İ dönüşümü
-      if (sonKarakter === 'i') harf = 'İ';
-      if (sonKarakter === 'ı') harf = 'I';
-      if (harfEkleRef.current) harfEkleRef.current(harf);
+    // Tüm karakterleri işle
+    for (const karakter of value) {
+      // Geçerli harf mi kontrol et
+      if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(karakter)) {
+        let harf = karakter.toUpperCase();
+        // Türkçe i/İ dönüşümü
+        if (karakter === 'i') harf = 'İ';
+        if (karakter === 'ı') harf = 'I';
+        if (harfEkleRef.current) harfEkleRef.current(harf);
+      }
     }
     
     // Input'u temizle
@@ -690,44 +691,36 @@ export default function Home() {
         onRozetler={() => setRozetlerModalAcik(true)}
         onAyarlar={() => setAyarlarModalAcik(true)}
         rozetSayisi={`${kazanilanRozetSayisi()}/${toplamRozetSayisi()}`}
+        istatistik={istatistik}
       />
 
-      <main className="flex-1 flex flex-col items-center py-4 px-4 max-w-xl mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center py-3 px-3 max-w-xl mx-auto w-full">
         
-        {/* ÜST MENÜ */}
+        {/* ÜST MENÜ - Pill Style */}
         <div className="top-menu w-full">
-          <button onClick={() => setKategoriModalAcik(true)} className="menu-item">
+          <button onClick={() => setKategoriModalAcik(true)} className="menu-pill">
             <span className="emoji">{mevcutKategoriInfo.emoji}</span>
-            <div className="flex flex-col items-start">
-              <span className="label">Kategori</span>
-              <span className="value">{mevcutKategoriInfo.isim}</span>
-            </div>
+            <span className="text">{mevcutKategoriInfo.isim}</span>
           </button>
 
-          <button onClick={() => setModModalAcik(true)} className="menu-item">
+          <button onClick={() => setModModalAcik(true)} className="menu-pill">
             <span className="emoji">{mevcutModInfo.emoji}</span>
-            <div className="flex flex-col items-start">
-              <span className="label">Mod</span>
-              <span className="value">{mevcutModInfo.isim}</span>
-            </div>
+            <span className="text">{mevcutModInfo.isim}</span>
           </button>
 
           <button 
             onClick={ipucuKullan}
             disabled={ipucuHakki <= 0 || oyunBitti || mod === 'kor' || mod === 'gunluk'}
-            className={`menu-item ${ipucuHakki <= 0 || oyunBitti || mod === 'kor' || mod === 'gunluk' ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`menu-pill ${ipucuHakki <= 0 || oyunBitti || mod === 'kor' || mod === 'gunluk' ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <span className="emoji">💡</span>
-            <div className="flex flex-col items-start">
-              <span className="label">İpucu</span>
-              <span className="value">{ipucuHakki} Hak</span>
-            </div>
+            <span className="text">{ipucuHakki} İpucu</span>
           </button>
         </div>
 
         {/* Uzunluk seçici */}
         {mod !== 'merdiven' && mod !== 'gunluk' && (
-          <div className="length-selector w-full my-3">
+          <div className="length-selector">
             {[4, 5, 6, 7].map(u => (
               <button
                 key={u}
