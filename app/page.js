@@ -564,16 +564,26 @@ export default function Home() {
     
     const value = e.target.value || '';
     
-    // Tüm karakterleri işle
+    // Geçerli harfleri topla
+    let yeniHarfler = '';
     for (const karakter of value) {
-      // Geçerli harf mi kontrol et
       if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(karakter)) {
         let harf = karakter.toUpperCase();
         // Türkçe i/İ dönüşümü
         if (karakter === 'i') harf = 'İ';
         if (karakter === 'ı') harf = 'I';
-        if (harfEkleRef.current) harfEkleRef.current(harf);
+        yeniHarfler += harf;
       }
+    }
+    
+    // Tüm harfleri tek seferde ekle
+    if (yeniHarfler) {
+      setMevcutTahmin(prev => {
+        const yeni = prev + yeniHarfler;
+        // Maksimum uzunluğu aşmasın
+        return yeni.slice(0, hedefKelime.length);
+      });
+      setHataMetni('');
     }
     
     // Input'u temizle
@@ -812,12 +822,40 @@ export default function Home() {
           autoCapitalize="characters"
           spellCheck="false"
           className="mobile-input"
-          value=""
-          onChange={handleMobilInput}
+          onInput={(e) => {
+            if (oyunBitti || !hedefKelime) return;
+            
+            const value = e.target.value || '';
+            
+            // Geçerli harfleri topla
+            let yeniHarfler = '';
+            for (const karakter of value) {
+              if (/^[a-zA-ZçÇğĞıİöÖşŞüÜ]$/.test(karakter)) {
+                let harf = karakter.toUpperCase();
+                if (karakter === 'i') harf = 'İ';
+                if (karakter === 'ı') harf = 'I';
+                yeniHarfler += harf;
+              }
+            }
+            
+            if (yeniHarfler) {
+              setMevcutTahmin(prev => {
+                const yeni = prev + yeniHarfler;
+                return yeni.slice(0, hedefKelime.length);
+              });
+              setHataMetni('');
+            }
+            
+            // Input'u temizle
+            e.target.value = '';
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
               if (tahminGonderRef.current) tahminGonderRef.current();
+            } else if (e.key === 'Backspace') {
+              e.preventDefault();
+              if (harfSilRef.current) harfSilRef.current();
             }
           }}
         />
