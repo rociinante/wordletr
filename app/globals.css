@@ -373,18 +373,6 @@ body::after {
 .menu-close:active {
   transform: rotate(90deg) scale(0.9);
 }
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.2s;
-}
-
-.menu-close:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
-}
 
 /* Menü Body */
 .menu-body {
