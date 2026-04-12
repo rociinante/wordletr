@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +6,7 @@
 
 :root {
   --font-display: 'Space Grotesk', sans-serif;
-  --font-body: 'Poppins', sans-serif;
+  --font-body: 'Nunito', sans-serif;
   
   /* Premium Gradient Tema */
   --bg-primary: #0a0a12;
@@ -743,78 +743,47 @@ body::after {
   font-family: var(--font-display);
   font-size: 28px;
   font-weight: 800;
-  border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(165deg, 
-    rgba(255, 255, 255, 0.08) 0%, 
-    rgba(255, 255, 255, 0.02) 50%,
-    rgba(0, 0, 0, 0.1) 100%
-  );
-  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-tertiary);
   text-transform: uppercase;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease;
   color: var(--text-primary);
-  box-shadow: 
-    0 10px 40px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .hucre.dolu {
   border-color: var(--accent);
-  transform: scale(1.08);
-  animation: pop 0.2s ease;
-  background: linear-gradient(165deg, 
-    rgba(139, 92, 246, 0.25) 0%, 
-    rgba(139, 92, 246, 0.1) 50%,
-    rgba(0, 0, 0, 0.1) 100%
-  );
-  box-shadow: 
-    0 12px 40px rgba(139, 92, 246, 0.4),
-    0 0 0 1px rgba(139, 92, 246, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+  animation: pop 0.15s ease;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, var(--bg-tertiary) 100%);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
 }
 
 @keyframes pop {
   0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1.08); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1.05); }
 }
 
-/* DOĞRU - Yeşil Parlak */
+/* DOĞRU - Yeşil */
 .hucre.dogru {
   background: linear-gradient(165deg, #34d399 0%, #22c55e 50%, #16a34a 100%) !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: white !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  box-shadow: 
-    0 12px 40px rgba(34, 197, 94, 0.6),
-    0 0 60px rgba(34, 197, 94, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
-  animation: flip 0.5s ease forwards, glow-green 2s ease-in-out infinite;
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.5);
+  animation: flip 0.5s ease forwards;
 }
 
-@keyframes glow-green {
-  0%, 100% { box-shadow: 0 12px 40px rgba(34, 197, 94, 0.6), 0 0 60px rgba(34, 197, 94, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
-  50% { box-shadow: 0 12px 50px rgba(34, 197, 94, 0.8), 0 0 80px rgba(34, 197, 94, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
-}
-
-/* MEVCUT - Sarı/Turuncu Parlak */
+/* MEVCUT - Sarı/Turuncu */
 .hucre.mevcut {
   background: linear-gradient(165deg, #fcd34d 0%, #f59e0b 50%, #d97706 100%) !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
   color: white !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  box-shadow: 
-    0 12px 40px rgba(245, 158, 11, 0.6),
-    0 0 60px rgba(245, 158, 11, 0.3),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
-  animation: flip 0.5s ease forwards, glow-yellow 2s ease-in-out infinite;
-}
-
-@keyframes glow-yellow {
-  0%, 100% { box-shadow: 0 12px 40px rgba(245, 158, 11, 0.6), 0 0 60px rgba(245, 158, 11, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
-  50% { box-shadow: 0 12px 50px rgba(245, 158, 11, 0.8), 0 0 80px rgba(245, 158, 11, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3); }
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+  animation: flip 0.5s ease forwards;
 }
 
 /* YOK - Gri */
@@ -902,11 +871,6 @@ body::after {
 .klavye-tus.ozel:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
-}
-
-.klavye-tus.turkce-ozel {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
-  border-color: rgba(139, 92, 246, 0.3);
 }
 
 /* Klavye tuş renkleri */
@@ -1703,4 +1667,46 @@ body::after {
   font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.5;
+}
+
+/* ==================== MOBİL OPTİMİZASYON ==================== */
+/* Mobilde performans için animasyonları basitleştir */
+@media (max-width: 768px) {
+  /* Arka plan animasyonlarını kapat */
+  body::before,
+  body::after {
+    animation: none !important;
+  }
+  
+  /* Hücre animasyonlarını basitleştir */
+  .hucre.dogru,
+  .hucre.mevcut,
+  .hucre.yok {
+    animation: none !important;
+    transition: all 0.15s ease !important;
+  }
+  
+  /* backdrop-filter'ı kaldır (performans için) */
+  .modal-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+  }
+  
+  .menu-overlay.aktif {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+  }
+}
+
+/* Kullanıcı animasyon tercihine saygı */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
